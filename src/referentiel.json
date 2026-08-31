@@ -1,0 +1,701 @@
+{
+  "schema_version": "1.0.0",
+  "axes": [
+    {
+      "id": "T",
+      "label": "Taille",
+      "reference_source": ["GA", "PR"],
+      "marches": [
+        {
+          "id": "T1",
+          "label": "tâche S",
+          "default": true,
+          "proof_paths": [],
+          "counter_proof": null
+        },
+        {
+          "id": "T2",
+          "label": "feature M",
+          "default": false,
+          "proof_paths": [
+            {
+              "path_id": "T2.p1",
+              "description": "GA médiane size_distribution ≥ M",
+              "force": "prouve",
+              "signal_id": "GA.size_median",
+              "source": "GA"
+            },
+            {
+              "path_id": "T2.p2",
+              "description": "PR médiane (fichiers 5-12 ou lignes 150-500)",
+              "force": "prouve",
+              "signal_id": "PR.median_files_or_lines_changed",
+              "source": "PR"
+            },
+            {
+              "path_id": "T2.p3",
+              "description": "S : session touchant ≥ 3 fichiers d'un module",
+              "force": "indice",
+              "signal_id": "S.files_touched_single_module",
+              "source": "S"
+            },
+            {
+              "path_id": "T2.p4",
+              "description": "SU : skill/agent spécifique orienté taille (multi-fichiers, migration, plusieurs couches)",
+              "force": "indice",
+              "signal_id": "SU.size_oriented_setup_present",
+              "source": "SU"
+            }
+          ],
+          "counter_proof": {
+            "description": "GA/PR médiane ≤ S (taille S)",
+            "signal_id": "GA.size_median"
+          }
+        },
+        {
+          "id": "T3",
+          "label": "feature L planifiée",
+          "default": false,
+          "proof_paths": [
+            {
+              "path_id": "T3.p1",
+              "description": "GA médiane ≥ L",
+              "force": "prouve",
+              "signal_id": "GA.size_median",
+              "source": "GA"
+            },
+            {
+              "path_id": "T3.p2",
+              "description": "PR médiane > 12 fichiers ou ≥ 2 couches",
+              "force": "prouve",
+              "signal_id": "PR.median_files_or_layers_changed",
+              "source": "PR"
+            },
+            {
+              "path_id": "T3.p3",
+              "description": "S : plan en phases + ≥ 2 couches",
+              "force": "indice",
+              "signal_id": "S.phased_plan_multi_layer",
+              "source": "S"
+            }
+          ],
+          "counter_proof": {
+            "description": "GA/PR médiane ≤ M",
+            "signal_id": "GA.size_median"
+          }
+        },
+        {
+          "id": "T4",
+          "label": "XL master plan",
+          "default": false,
+          "proof_paths": [
+            {
+              "path_id": "T4.p1",
+              "description": "GA xl ≥ 20 % des PR",
+              "force": "prouve",
+              "signal_id": "GA.xl_ratio",
+              "source": "GA"
+            }
+          ],
+          "counter_proof": {
+            "description": "GA/PR : aucune PR XL",
+            "signal_id": "GA.xl_ratio"
+          }
+        }
+      ]
+    },
+    {
+      "id": "H",
+      "label": "Harness",
+      "reference_source": ["GA", "RC"],
+      "marches": [
+        {
+          "id": "H1",
+          "label": "prompts structurés",
+          "default": true,
+          "proof_paths": [],
+          "counter_proof": null
+        },
+        {
+          "id": "H2",
+          "label": "identité projet",
+          "default": false,
+          "proof_paths": [
+            {
+              "path_id": "H2.p1",
+              "description": "RC fichier d'identité spécifique",
+              "force": "prouve",
+              "signal_id": "RC.identity_file_specific",
+              "source": "RC"
+            },
+            {
+              "path_id": "H2.p2",
+              "description": "GA agents_md = true",
+              "force": "prouve",
+              "signal_id": "GA.agents_md",
+              "source": "GA"
+            }
+          ],
+          "counter_proof": {
+            "description": "context_files à zéro ; RC fourni sans fichier d'identité",
+            "signal_id": "GA.context_files"
+          }
+        },
+        {
+          "id": "H3",
+          "label": "mémoire vivante",
+          "default": false,
+          "proof_paths": [
+            {
+              "path_id": "H3.p1",
+              "description": "RC ≥ 1 fichier de mémoire spécifique et vivant",
+              "force": "prouve",
+              "signal_id": "RC.memory_files_specific_alive",
+              "source": "RC"
+            },
+            {
+              "path_id": "H3.p2",
+              "description": "GA agents_md = true et last_updated dans la fenêtre",
+              "force": "prouve",
+              "signal_id": "GA.agents_md_maintained",
+              "source": "GA"
+            }
+          ],
+          "counter_proof": {
+            "description": "RC fourni sans mémoire ; last_updated hors fenêtre",
+            "signal_id": "RC.memory_files_specific_alive"
+          }
+        },
+        {
+          "id": "H4",
+          "label": "comportements versionnés",
+          "default": false,
+          "proof_paths": [
+            {
+              "path_id": "H4.p1",
+              "description": "RC ≥ 1 règle/skill/commande/agent spécifique",
+              "force": "prouve",
+              "signal_id": "RC.behavior_artifacts_specific_count",
+              "source": "RC"
+            },
+            {
+              "path_id": "H4.p2",
+              "description": "GA rules + skills + agents ≥ 1",
+              "force": "prouve",
+              "signal_id": "GA.rules_skills_agents_count",
+              "source": "GA"
+            }
+          ],
+          "counter_proof": {
+            "description": "GA à zéro et RC sans artefact de comportement",
+            "signal_id": "GA.rules_skills_agents_count"
+          }
+        },
+        {
+          "id": "H5",
+          "label": "guardrails",
+          "default": false,
+          "proof_paths": [
+            {
+              "path_id": "H5.p1",
+              "description": "RC hook / deny-list / pre-commit / CI gate",
+              "force": "prouve",
+              "signal_id": "RC.guardrail_artifact_present",
+              "source": "RC"
+            },
+            {
+              "path_id": "H5.p2",
+              "description": "GA hooks_count ≥ 1",
+              "force": "prouve",
+              "signal_id": "GA.hooks_count",
+              "source": "GA"
+            }
+          ],
+          "counter_proof": {
+            "description": "GA hooks = 0 et RC sans guardrail",
+            "signal_id": "GA.hooks_count"
+          }
+        },
+        {
+          "id": "H6",
+          "label": "boucles (artefact exécutable)",
+          "default": false,
+          "proof_paths": [
+            {
+              "path_id": "H6.p1",
+              "description": "RC artefact exécutable de boucle (script/hook/job CI relançant sur échec avec plafond)",
+              "force": "prouve",
+              "signal_id": "RC.loop_artifact_executable",
+              "source": "RC"
+            },
+            {
+              "path_id": "H6.p2",
+              "description": "S : l'agent relance seul les checks jusqu'au vert",
+              "force": "indice",
+              "signal_id": "S.autonomous_retry_until_green",
+              "source": "S"
+            }
+          ],
+          "counter_proof": {
+            "description": "RC fourni sans artefact exécutable",
+            "signal_id": "RC.loop_artifact_executable"
+          }
+        },
+        {
+          "id": "H7",
+          "label": "orchestration gouvernée",
+          "default": false,
+          "proof_paths": [
+            {
+              "path_id": "H7.p1",
+              "description": "RC orchestrateur multi-agents/workflow et evals ou trust tiers",
+              "force": "prouve",
+              "signal_id": "RC.governed_orchestration_present",
+              "source": "RC"
+            },
+            {
+              "path_id": "H7.p2",
+              "description": "S : sous-agents orchestrés",
+              "force": "indice",
+              "signal_id": "S.subagents_orchestrated",
+              "source": "S"
+            }
+          ],
+          "counter_proof": {
+            "description": "RC fourni sans orchestrateur",
+            "signal_id": "RC.governed_orchestration_present"
+          }
+        }
+      ]
+    },
+    {
+      "id": "I",
+      "label": "Intervention",
+      "reference_source": ["GA"],
+      "marches": [
+        {
+          "id": "I1",
+          "label": "corrige après coup",
+          "default": true,
+          "proof_paths": [],
+          "counter_proof": null
+        },
+        {
+          "id": "I2",
+          "label": "cadre avant",
+          "default": false,
+          "proof_paths": [
+            {
+              "path_id": "I2.p1",
+              "description": "GA median_correction_commits_after_open ≤ 3",
+              "force": "prouve",
+              "signal_id": "GA.median_correction_commits_after_open",
+              "source": "GA"
+            },
+            {
+              "path_id": "I2.p2",
+              "description": "S : premier prompt avec contexte, contraintes, cas limites",
+              "force": "indice",
+              "signal_id": "S.first_prompt_framed",
+              "source": "S"
+            },
+            {
+              "path_id": "I2.p3",
+              "description": "SU : skill/agent spécifique cadrant l'autonomie (critères d'arrêt, jalons, sans validation)",
+              "force": "indice",
+              "signal_id": "SU.autonomous_framing_setup_present",
+              "source": "SU"
+            }
+          ],
+          "counter_proof": {
+            "description": "GA corr > 3",
+            "signal_id": "GA.median_correction_commits_after_open"
+          }
+        },
+        {
+          "id": "I3",
+          "label": "aux étapes clés",
+          "default": false,
+          "proof_paths": [
+            {
+              "path_id": "I3.p1",
+              "description": "GA median_correction_commits_after_open ≤ 1",
+              "force": "prouve",
+              "signal_id": "GA.median_correction_commits_after_open",
+              "source": "GA"
+            },
+            {
+              "path_id": "I3.p2",
+              "description": "S : plan validé avant implémentation + interventions aux jalons",
+              "force": "indice",
+              "signal_id": "S.milestone_framing_present",
+              "source": "S"
+            }
+          ],
+          "counter_proof": {
+            "description": "GA corr > 1",
+            "signal_id": "GA.median_correction_commits_after_open"
+          }
+        },
+        {
+          "id": "I4",
+          "label": "jamais une fois cadré",
+          "default": false,
+          "proof_paths": [
+            {
+              "path_id": "I4.p1",
+              "description": "GA merged_without_human_edit_after_open / PR mergées dans period (ou / pull_requests.total en approximation) ≥ 0,8 et ai_coauthored_ratio ≥ 0,9",
+              "force": "prouve",
+              "signal_id": "GA.merged_without_human_edit_ratio",
+              "source": "GA"
+            }
+          ],
+          "counter_proof": {
+            "description": "GA ratio < 0,8 ou co-autorat < 0,9",
+            "signal_id": "GA.merged_without_human_edit_ratio"
+          }
+        },
+        {
+          "id": "I5",
+          "label": "jamais, cadrage compris",
+          "default": false,
+          "proof_paths": [
+            {
+              "path_id": "I5.p1",
+              "description": "PR ouvertes par un compte d'agent configuré (recognaize.config.json ; sans champ auteur ⇒ inconnu)",
+              "force": "prouve",
+              "signal_id": "PR.opened_by_configured_agent_account",
+              "source": "PR"
+            }
+          ],
+          "counter_proof": null
+        }
+      ]
+    },
+    {
+      "id": "P",
+      "label": "Parallèle",
+      "reference_source": ["GA", "PR"],
+      "marches": [
+        {
+          "id": "P1",
+          "label": "un chantier",
+          "default": true,
+          "proof_paths": [],
+          "counter_proof": null
+        },
+        {
+          "id": "P2",
+          "label": "isolation & préparation",
+          "default": false,
+          "proof_paths": [
+            {
+              "path_id": "P2.p1",
+              "description": "GA median_concurrent_branches ≥ 2, ou max ≥ 2 et RC artefact d'isolation (worktrees, .worktreeinclude)",
+              "force": "prouve",
+              "signal_id": "GA.concurrent_branches_with_isolation",
+              "source": "GA"
+            },
+            {
+              "path_id": "P2.p2",
+              "description": "S : worktrees/sessions parallèles",
+              "force": "indice",
+              "signal_id": "S.parallel_worktrees_mentioned",
+              "source": "S"
+            }
+          ],
+          "counter_proof": {
+            "description": "GA max < 2",
+            "signal_id": "GA.max_concurrent_branches"
+          }
+        },
+        {
+          "id": "P3",
+          "label": "≥ 3 habituellement",
+          "default": false,
+          "proof_paths": [
+            {
+              "path_id": "P3.p1",
+              "description": "GA median_concurrent_branches ≥ 3",
+              "force": "prouve",
+              "signal_id": "GA.median_concurrent_branches",
+              "source": "GA"
+            },
+            {
+              "path_id": "P3.p2",
+              "description": "PR recouvrement médian (created→merged) ≥ 3",
+              "force": "prouve",
+              "signal_id": "PR.median_overlap_count",
+              "source": "PR"
+            }
+          ],
+          "counter_proof": {
+            "description": "GA médiane < 3 ; PR recouvrement médian < 3",
+            "signal_id": "GA.median_concurrent_branches"
+          }
+        }
+      ]
+    },
+    {
+      "id": "O",
+      "label": "Ownership",
+      "reference_source": ["GA", "RC"],
+      "marches": [
+        {
+          "id": "O1",
+          "label": "lit avant de merger",
+          "default": true,
+          "proof_paths": [],
+          "counter_proof": null
+        },
+        {
+          "id": "O2",
+          "label": "vérifie",
+          "default": false,
+          "proof_paths": [
+            {
+              "path_id": "O2.p1",
+              "description": "GA prs_with_tests_ratio ≥ 0,5 et coverage_end ≥ coverage_start − 0,02",
+              "force": "prouve",
+              "signal_id": "GA.prs_with_tests_ratio",
+              "source": "GA"
+            },
+            {
+              "path_id": "O2.p3",
+              "description": "S : tests d'abord, vus en échec",
+              "force": "indice",
+              "signal_id": "S.tests_first_seen_failing",
+              "source": "S"
+            }
+          ],
+          "counter_proof": {
+            "description": "GA tests < 0,5 ou couverture ↓",
+            "signal_id": "GA.prs_with_tests_ratio"
+          }
+        },
+        {
+          "id": "O3",
+          "label": "comprend et capitalise",
+          "default": false,
+          "proof_paths": [
+            {
+              "path_id": "O3.p1",
+              "description": "RC ≥ 1 artefact de capitalisation spécifique (décisions/ADR, plans, specs, assertions, incidents)",
+              "force": "prouve",
+              "signal_id": "RC.capitalization_artifact_specific_count",
+              "source": "RC"
+            },
+            {
+              "path_id": "O3.p2",
+              "description": "PR ≥ 50 % des bodies non nuls structurés (contexte / changement)",
+              "force": "prouve",
+              "signal_id": "PR.structured_body_ratio",
+              "source": "PR"
+            },
+            {
+              "path_id": "O3.p3",
+              "description": "S : RCA, question métier, correction du contexte",
+              "force": "indice",
+              "signal_id": "S.context_correction_or_rca_present",
+              "source": "S"
+            }
+          ],
+          "counter_proof": {
+            "description": "RC fourni sans artefact et aucun body structuré",
+            "signal_id": "RC.capitalization_artifact_specific_count"
+          }
+        },
+        {
+          "id": "O4",
+          "label": "délègue raisonnablement",
+          "default": false,
+          "proof_paths": [
+            {
+              "path_id": "O4.p1",
+              "description": "RC agent/prompt de review ou approval gate/deny-list",
+              "force": "prouve",
+              "signal_id": "RC.review_agent_or_approval_gate_present",
+              "source": "RC"
+            },
+            {
+              "path_id": "O4.p3",
+              "description": "S : revue IA avant PR",
+              "force": "indice",
+              "signal_id": "S.ai_review_before_pr",
+              "source": "S"
+            }
+          ],
+          "counter_proof": {
+            "description": "RC fourni sans reviewer ni gate",
+            "signal_id": "RC.review_agent_or_approval_gate_present"
+          }
+        },
+        {
+          "id": "O5",
+          "label": "gouverne l'autonomie",
+          "default": false,
+          "proof_paths": [
+            {
+              "path_id": "O5.p1",
+              "description": "RC evals versionnés et trust tiers / circuit breaker",
+              "force": "prouve",
+              "signal_id": "RC.evals_and_trust_tier_present",
+              "source": "RC"
+            }
+          ],
+          "counter_proof": {
+            "description": "RC fourni sans evals",
+            "signal_id": "RC.evals_and_trust_tier_present"
+          }
+        }
+      ]
+    }
+  ],
+  "thresholds": {
+    "T2.p1": { "kind": "condition", "signal_id": "GA.size_median", "comparator": "gte", "value": "M", "value_type": "enum", "unit": "taille_bucket" },
+    "T2.p2": {
+      "kind": "or",
+      "of": [
+        {
+          "kind": "and",
+          "of": [
+            { "kind": "condition", "signal_id": "PR.median_files_changed", "comparator": "gte", "value": 5, "value_type": "count", "unit": "fichiers" },
+            { "kind": "condition", "signal_id": "PR.median_files_changed", "comparator": "lte", "value": 12, "value_type": "count", "unit": "fichiers" }
+          ]
+        },
+        {
+          "kind": "and",
+          "of": [
+            { "kind": "condition", "signal_id": "PR.median_lines_changed", "comparator": "gte", "value": 150, "value_type": "count", "unit": "lignes" },
+            { "kind": "condition", "signal_id": "PR.median_lines_changed", "comparator": "lte", "value": 500, "value_type": "count", "unit": "lignes" }
+          ]
+        }
+      ]
+    },
+    "T2.p3": { "kind": "condition", "signal_id": "S.files_touched_single_module", "comparator": "gte", "value": 3, "value_type": "count", "unit": "fichiers" },
+    "T2.p4": { "kind": "condition", "signal_id": "SU.size_oriented_setup_present", "comparator": "eq", "value": true, "value_type": "boolean" },
+    "T3.p1": { "kind": "condition", "signal_id": "GA.size_median", "comparator": "gte", "value": "L", "value_type": "enum", "unit": "taille_bucket" },
+    "T3.p2": {
+      "kind": "or",
+      "of": [
+        { "kind": "condition", "signal_id": "PR.median_files_changed", "comparator": "gt", "value": 12, "value_type": "count", "unit": "fichiers" },
+        { "kind": "condition", "signal_id": "PR.median_layers_touched", "comparator": "gte", "value": 2, "value_type": "count", "unit": "couches" }
+      ]
+    },
+    "T3.p3": {
+      "kind": "and",
+      "of": [
+        { "kind": "condition", "signal_id": "S.has_phased_plan", "comparator": "eq", "value": true, "value_type": "boolean" },
+        { "kind": "condition", "signal_id": "S.layers_touched", "comparator": "gte", "value": 2, "value_type": "count", "unit": "couches" }
+      ]
+    },
+    "T4.p1": { "kind": "condition", "signal_id": "GA.xl_ratio", "comparator": "gte", "value": 0.2, "value_type": "ratio", "unit": "ratio" },
+    "H2.p1": { "kind": "condition", "signal_id": "RC.identity_file_specific", "comparator": "eq", "value": true, "value_type": "boolean" },
+    "H2.p2": { "kind": "condition", "signal_id": "GA.agents_md", "comparator": "eq", "value": true, "value_type": "boolean" },
+    "H3.p1": {
+      "kind": "and",
+      "of": [
+        { "kind": "condition", "signal_id": "RC.memory_files_specific_count", "comparator": "gte", "value": 1, "value_type": "count", "unit": "fichiers" },
+        { "kind": "condition", "signal_id": "RC.memory_files_alive", "comparator": "eq", "value": true, "value_type": "boolean" }
+      ]
+    },
+    "H3.p2": {
+      "kind": "and",
+      "of": [
+        { "kind": "condition", "signal_id": "GA.agents_md", "comparator": "eq", "value": true, "value_type": "boolean" },
+        { "kind": "condition", "signal_id": "GA.agents_md_last_updated_in_window", "comparator": "eq", "value": true, "value_type": "boolean" }
+      ]
+    },
+    "H4.p1": { "kind": "condition", "signal_id": "RC.behavior_artifacts_specific_count", "comparator": "gte", "value": 1, "value_type": "count", "unit": "artefacts" },
+    "H4.p2": { "kind": "condition", "signal_id": "GA.rules_skills_agents_count", "comparator": "gte", "value": 1, "value_type": "count", "unit": "artefacts" },
+    "H5.p1": { "kind": "condition", "signal_id": "RC.guardrail_artifact_present", "comparator": "eq", "value": true, "value_type": "boolean" },
+    "H5.p2": { "kind": "condition", "signal_id": "GA.hooks_count", "comparator": "gte", "value": 1, "value_type": "count", "unit": "hooks" },
+    "H6.p1": { "kind": "condition", "signal_id": "RC.loop_artifact_executable", "comparator": "eq", "value": true, "value_type": "boolean" },
+    "H6.p2": { "kind": "condition", "signal_id": "S.autonomous_retry_until_green", "comparator": "eq", "value": true, "value_type": "boolean" },
+    "H7.p1": {
+      "kind": "and",
+      "of": [
+        { "kind": "condition", "signal_id": "RC.multi_agent_orchestrator_count", "comparator": "gte", "value": 2, "value_type": "count", "unit": "artefacts" },
+        { "kind": "condition", "signal_id": "RC.evals_or_trust_tier_present", "comparator": "eq", "value": true, "value_type": "boolean" }
+      ]
+    },
+    "H7.p2": { "kind": "condition", "signal_id": "S.subagents_orchestrated", "comparator": "eq", "value": true, "value_type": "boolean" },
+    "I2.p1": { "kind": "condition", "signal_id": "GA.median_correction_commits_after_open", "comparator": "lte", "value": 3, "value_type": "count", "unit": "commits" },
+    "I2.p2": { "kind": "condition", "signal_id": "S.first_prompt_framed", "comparator": "eq", "value": true, "value_type": "boolean" },
+    "I2.p3": { "kind": "condition", "signal_id": "SU.autonomous_framing_setup_present", "comparator": "eq", "value": true, "value_type": "boolean" },
+    "I3.p1": { "kind": "condition", "signal_id": "GA.median_correction_commits_after_open", "comparator": "lte", "value": 1, "value_type": "count", "unit": "commits" },
+    "I3.p2": { "kind": "condition", "signal_id": "S.milestone_framing_present", "comparator": "eq", "value": true, "value_type": "boolean" },
+    "I4.p1": {
+      "kind": "and",
+      "of": [
+        { "kind": "condition", "signal_id": "GA.merged_without_human_edit_ratio", "comparator": "gte", "value": 0.8, "value_type": "ratio", "unit": "ratio" },
+        { "kind": "condition", "signal_id": "GA.ai_coauthored_ratio", "comparator": "gte", "value": 0.9, "value_type": "ratio", "unit": "ratio" }
+      ]
+    },
+    "I5.p1": { "kind": "condition", "signal_id": "PR.opened_by_configured_agent_account", "comparator": "eq", "value": true, "value_type": "boolean" },
+    "P2.p1": {
+      "kind": "or",
+      "of": [
+        { "kind": "condition", "signal_id": "GA.median_concurrent_branches", "comparator": "gte", "value": 2, "value_type": "count", "unit": "branches" },
+        {
+          "kind": "and",
+          "of": [
+            { "kind": "condition", "signal_id": "GA.max_concurrent_branches", "comparator": "gte", "value": 2, "value_type": "count", "unit": "branches" },
+            { "kind": "condition", "signal_id": "RC.isolation_artifact_present", "comparator": "eq", "value": true, "value_type": "boolean" }
+          ]
+        }
+      ]
+    },
+    "P2.p2": { "kind": "condition", "signal_id": "S.parallel_worktrees_mentioned", "comparator": "eq", "value": true, "value_type": "boolean" },
+    "P3.p1": { "kind": "condition", "signal_id": "GA.median_concurrent_branches", "comparator": "gte", "value": 3, "value_type": "count", "unit": "branches" },
+    "P3.p2": { "kind": "condition", "signal_id": "PR.median_overlap_count", "comparator": "gte", "value": 3, "value_type": "count", "unit": "PR" },
+    "O2.p1": {
+      "kind": "and",
+      "of": [
+        { "kind": "condition", "signal_id": "GA.prs_with_tests_ratio", "comparator": "gte", "value": 0.5, "value_type": "ratio", "unit": "ratio" },
+        { "kind": "condition", "signal_id": "SO.coverage_non_regression", "comparator": "eq", "value": true, "value_type": "boolean" }
+      ]
+    },
+    "O2.p3": { "kind": "condition", "signal_id": "S.tests_first_seen_failing", "comparator": "eq", "value": true, "value_type": "boolean" },
+    "O3.p1": { "kind": "condition", "signal_id": "RC.capitalization_artifact_specific_count", "comparator": "gte", "value": 1, "value_type": "count", "unit": "artefacts" },
+    "O3.p2": { "kind": "condition", "signal_id": "PR.structured_body_ratio", "comparator": "gte", "value": 0.5, "value_type": "ratio", "unit": "ratio" },
+    "O3.p3": { "kind": "condition", "signal_id": "S.context_correction_or_rca_present", "comparator": "eq", "value": true, "value_type": "boolean" },
+    "O4.p1": {
+      "kind": "or",
+      "of": [
+        { "kind": "condition", "signal_id": "RC.review_agent_present", "comparator": "eq", "value": true, "value_type": "boolean" },
+        { "kind": "condition", "signal_id": "RC.approval_gate_present", "comparator": "eq", "value": true, "value_type": "boolean" }
+      ]
+    },
+    "O4.p3": { "kind": "condition", "signal_id": "S.ai_review_before_pr", "comparator": "eq", "value": true, "value_type": "boolean" },
+    "O5.p1": {
+      "kind": "and",
+      "of": [
+        { "kind": "condition", "signal_id": "RC.evals_versioned_present", "comparator": "eq", "value": true, "value_type": "boolean" },
+        { "kind": "condition", "signal_id": "RC.trust_tier_or_circuit_breaker_present", "comparator": "eq", "value": true, "value_type": "boolean" }
+      ]
+    }
+  },
+  "ladder": {
+    "red": ["T1", "H1", "I1", "P1"],
+    "blue": ["T2", "H2", "H3", "I2"],
+    "green": ["T3", "H4", "I3"],
+    "copper": ["P2", "P3"],
+    "silver": ["H5", "H6", "I4"],
+    "gold": ["H7", "I5"]
+  },
+  "ownership": {
+    "blocking": false,
+    "marches": ["O1", "O2", "O3", "O4", "O5"]
+  },
+  "confiance_source": {
+    "GA": 1.0,
+    "RC": 1.0,
+    "PR": 0.9,
+    "SO": 0.8,
+    "S": 0.6,
+    "SU": 0.3,
+    "DEC": 0
+  },
+  "source_precedence": ["RC", "PR", "GA", "SO", "S", "SU", "DEC"]
+}
