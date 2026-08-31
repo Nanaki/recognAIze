@@ -9,7 +9,7 @@
 > Ce formulaire pointe le **tag `v1.0.0-rendu`**, jamais `main`, conformément
 > à `aidd_docs/memory/vcs.md` (« Main Branch : gelée par le tag `v1.0.0-rendu`
 > avant le rendu ; suite sur `next` »). Le tag existe désormais
-> (`d6d8a62`, posé le 2026-08-31 après la revue finale — voir
+> (`a9b5698`, posé le 2026-08-31 après la revue finale — voir
 > `aidd_docs/KNOWN-ISSUES.md` pour son résultat détaillé, 10 findings
 > confirmés, 1 corrigé, 9 documentés pour `next`). La MR #1
 > (`feat/mvp-chemin-jury` → `main`) a été fusionnée par merge commit, `next`
