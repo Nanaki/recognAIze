@@ -1,0 +1,853 @@
+{
+  "schema_version": "0.5.0-part5-result-json",
+  "tool_version": "1.0.0",
+  "referentiel_hash": "30b2dfdc161d0a143e3aa8f7b41fb0cbc1d67576c2d0f52f5cc915a34f8a3be8",
+  "node_version": "20.19.0",
+  "as_of": "2026-07-15",
+  "profile_id": "arthur-befa156f",
+  "status": "ok",
+  "rang_prouve": "copper",
+  "rang_ponctuel": "copper",
+  "rang_affiche": "copper",
+  "fourchette": {
+    "bas": "copper",
+    "haut": "copper"
+  },
+  "confiance_globale": 0.5,
+  "axes": [
+    {
+      "axe": "T",
+      "niveau_prouve": "T4",
+      "niveau_ponctuel": "T4",
+      "plafond_potentiel": "T4",
+      "etats": [
+        {
+          "marche": "T1",
+          "etat": "prouvé"
+        },
+        {
+          "marche": "T2",
+          "etat": "prouvé"
+        },
+        {
+          "marche": "T3",
+          "etat": "prouvé"
+        },
+        {
+          "marche": "T4",
+          "etat": "prouvé"
+        }
+      ],
+      "couverture": 0.63,
+      "accord": 1,
+      "confiance": 0.63,
+      "observe": true
+    },
+    {
+      "axe": "H",
+      "niveau_prouve": "H5",
+      "niveau_ponctuel": "H5",
+      "plafond_potentiel": "H5",
+      "etats": [
+        {
+          "marche": "H1",
+          "etat": "prouvé"
+        },
+        {
+          "marche": "H2",
+          "etat": "prouvé"
+        },
+        {
+          "marche": "H3",
+          "etat": "prouvé"
+        },
+        {
+          "marche": "H4",
+          "etat": "prouvé"
+        },
+        {
+          "marche": "H5",
+          "etat": "prouvé"
+        },
+        {
+          "marche": "H6",
+          "etat": "infirmé"
+        },
+        {
+          "marche": "H7",
+          "etat": "infirmé"
+        }
+      ],
+      "couverture": 0.9,
+      "accord": 0.71,
+      "confiance": 0.64,
+      "observe": true
+    },
+    {
+      "axe": "I",
+      "niveau_prouve": "I3",
+      "niveau_ponctuel": "I3",
+      "plafond_potentiel": "I3",
+      "etats": [
+        {
+          "marche": "I1",
+          "etat": "prouvé"
+        },
+        {
+          "marche": "I2",
+          "etat": "prouvé"
+        },
+        {
+          "marche": "I3",
+          "etat": "prouvé"
+        },
+        {
+          "marche": "I4",
+          "etat": "infirmé"
+        },
+        {
+          "marche": "I5",
+          "etat": "inconnu"
+        }
+      ],
+      "couverture": 0.83,
+      "accord": 0.6,
+      "confiance": 0.5,
+      "observe": true
+    },
+    {
+      "axe": "P",
+      "niveau_prouve": "P3",
+      "niveau_ponctuel": "P3",
+      "plafond_potentiel": "P3",
+      "etats": [
+        {
+          "marche": "P1",
+          "etat": "prouvé"
+        },
+        {
+          "marche": "P2",
+          "etat": "prouvé"
+        },
+        {
+          "marche": "P3",
+          "etat": "prouvé"
+        }
+      ],
+      "couverture": 0.75,
+      "accord": 1,
+      "confiance": 0.75,
+      "observe": true
+    }
+  ],
+  "ownership": {
+    "niveau_prouve": "O4",
+    "niveau_ponctuel": "O4",
+    "etats": [
+      {
+        "marche": "O1",
+        "etat": "prouvé"
+      },
+      {
+        "marche": "O2",
+        "etat": "prouvé"
+      },
+      {
+        "marche": "O3",
+        "etat": "prouvé"
+      },
+      {
+        "marche": "O4",
+        "etat": "prouvé"
+      },
+      {
+        "marche": "O5",
+        "etat": "infirmé"
+      }
+    ],
+    "rabais_applique": false
+  },
+  "verdicts": [
+    {
+      "axe": "T",
+      "niveau_prouve": "T4",
+      "niveau_ponctuel": "T4",
+      "raison": "Toutes les marches connues de l'axe sont atteintes (jusqu'à T4).",
+      "etats": [
+        {
+          "marche": "T1",
+          "etat": "prouvé"
+        },
+        {
+          "marche": "T2",
+          "etat": "prouvé"
+        },
+        {
+          "marche": "T3",
+          "etat": "prouvé"
+        },
+        {
+          "marche": "T4",
+          "etat": "prouvé"
+        }
+      ]
+    },
+    {
+      "axe": "H",
+      "niveau_prouve": "H5",
+      "niveau_ponctuel": "H5",
+      "marche_bloquante": "H6",
+      "raison": "H6 (infirmé) : RC.loop_artifact_executable=non = oui",
+      "etats": [
+        {
+          "marche": "H1",
+          "etat": "prouvé"
+        },
+        {
+          "marche": "H2",
+          "etat": "prouvé"
+        },
+        {
+          "marche": "H3",
+          "etat": "prouvé"
+        },
+        {
+          "marche": "H4",
+          "etat": "prouvé"
+        },
+        {
+          "marche": "H5",
+          "etat": "prouvé"
+        },
+        {
+          "marche": "H6",
+          "etat": "infirmé"
+        },
+        {
+          "marche": "H7",
+          "etat": "infirmé"
+        }
+      ]
+    },
+    {
+      "axe": "I",
+      "niveau_prouve": "I3",
+      "niveau_ponctuel": "I3",
+      "marche_bloquante": "I4",
+      "raison": "I4 (infirmé) : GA.merged_without_human_edit_ratio=0.2987012987012987 ratio ≥ 0.8 ratio ; GA.ai_coauthored_ratio=0.91 ratio ≥ 0.9 ratio (approximation : pull-requests.json absent, dénominateur = pull_requests.total (46/154))",
+      "etats": [
+        {
+          "marche": "I1",
+          "etat": "prouvé"
+        },
+        {
+          "marche": "I2",
+          "etat": "prouvé"
+        },
+        {
+          "marche": "I3",
+          "etat": "prouvé"
+        },
+        {
+          "marche": "I4",
+          "etat": "infirmé"
+        },
+        {
+          "marche": "I5",
+          "etat": "inconnu"
+        }
+      ]
+    },
+    {
+      "axe": "P",
+      "niveau_prouve": "P3",
+      "niveau_ponctuel": "P3",
+      "raison": "Toutes les marches connues de l'axe sont atteintes (jusqu'à P3).",
+      "etats": [
+        {
+          "marche": "P1",
+          "etat": "prouvé"
+        },
+        {
+          "marche": "P2",
+          "etat": "prouvé"
+        },
+        {
+          "marche": "P3",
+          "etat": "prouvé"
+        }
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "H2.git-activity:H2.p2:preuve",
+      "signal_id": "GA.agents_md",
+      "valeur": {
+        "type": "boolean",
+        "unite": ""
+      },
+      "source": "GA",
+      "check_id": "H2.git-activity",
+      "path_id": "H2.p2",
+      "concept_id": "H2",
+      "axe": "H",
+      "polarite": "preuve",
+      "force": "prouve",
+      "citation": "GA.agents_md=oui = oui",
+      "confiance_source": 1
+    },
+    {
+      "id": "H2.repo-context:H2.p1:preuve",
+      "signal_id": "RC.identity_file_specific",
+      "valeur": {
+        "type": "boolean",
+        "unite": ""
+      },
+      "source": "RC",
+      "check_id": "H2.repo-context",
+      "path_id": "H2.p1",
+      "concept_id": "H2",
+      "axe": "H",
+      "polarite": "preuve",
+      "force": "prouve",
+      "citation": "RC.identity_file_specific=oui = oui",
+      "confiance_source": 1
+    },
+    {
+      "id": "H3.git-activity:H3.p2:preuve",
+      "signal_id": "GA.agents_md_maintained",
+      "valeur": {
+        "type": "boolean",
+        "unite": ""
+      },
+      "source": "GA",
+      "check_id": "H3.git-activity",
+      "path_id": "H3.p2",
+      "concept_id": "H3",
+      "axe": "H",
+      "polarite": "preuve",
+      "force": "prouve",
+      "citation": "GA.agents_md=oui = oui ; GA.agents_md_last_updated_in_window=oui = oui",
+      "confiance_source": 1
+    },
+    {
+      "id": "H3.repo-context:H3.p1:preuve",
+      "signal_id": "RC.memory_files_specific_alive",
+      "valeur": {
+        "type": "count",
+        "unite": "fichiers"
+      },
+      "source": "RC",
+      "check_id": "H3.repo-context",
+      "path_id": "H3.p1",
+      "concept_id": "H3",
+      "axe": "H",
+      "polarite": "preuve",
+      "force": "prouve",
+      "citation": "RC.memory_files_specific_count=1 fichiers ≥ 1 fichiers ; RC.memory_files_alive=oui = oui",
+      "confiance_source": 1
+    },
+    {
+      "id": "H4.git-activity:H4.p2:preuve",
+      "signal_id": "GA.rules_skills_agents_count",
+      "valeur": {
+        "type": "count",
+        "unite": "artefacts"
+      },
+      "source": "GA",
+      "check_id": "H4.git-activity",
+      "path_id": "H4.p2",
+      "concept_id": "H4",
+      "axe": "H",
+      "polarite": "preuve",
+      "force": "prouve",
+      "citation": "GA.rules_skills_agents_count=6 artefacts ≥ 1 artefacts",
+      "confiance_source": 1
+    },
+    {
+      "id": "H4.repo-context:H4.p1:preuve",
+      "signal_id": "RC.behavior_artifacts_specific_count",
+      "valeur": {
+        "type": "count",
+        "unite": "artefacts"
+      },
+      "source": "RC",
+      "check_id": "H4.repo-context",
+      "path_id": "H4.p1",
+      "concept_id": "H4",
+      "axe": "H",
+      "polarite": "preuve",
+      "force": "prouve",
+      "citation": "RC.behavior_artifacts_specific_count=1 artefacts ≥ 1 artefacts",
+      "confiance_source": 1
+    },
+    {
+      "id": "H5.repo-context:H5.p1:preuve",
+      "signal_id": "RC.guardrail_artifact_present",
+      "valeur": {
+        "type": "boolean",
+        "unite": ""
+      },
+      "source": "RC",
+      "check_id": "H5.repo-context",
+      "path_id": "H5.p1",
+      "concept_id": "H5",
+      "axe": "H",
+      "polarite": "preuve",
+      "force": "prouve",
+      "citation": "RC.guardrail_artifact_present=oui = oui",
+      "confiance_source": 1
+    },
+    {
+      "id": "H6.repo-context:H6.p1:contre-preuve",
+      "signal_id": "RC.loop_artifact_executable",
+      "valeur": {
+        "type": "boolean",
+        "unite": ""
+      },
+      "source": "RC",
+      "check_id": "H6.repo-context",
+      "path_id": "H6.p1",
+      "concept_id": "H6",
+      "axe": "H",
+      "polarite": "contre-preuve",
+      "force": "prouve",
+      "citation": "RC.loop_artifact_executable=non = oui",
+      "confiance_source": 1
+    },
+    {
+      "id": "H6.session:H6.p2:contre-preuve",
+      "signal_id": "S.autonomous_retry_until_green",
+      "valeur": {
+        "type": "boolean",
+        "unite": ""
+      },
+      "source": "S",
+      "check_id": "H6.session",
+      "path_id": "H6.p2",
+      "concept_id": "H6",
+      "axe": "H",
+      "polarite": "contre-preuve",
+      "force": "indice",
+      "citation": "S.autonomous_retry_until_green=non = oui",
+      "confiance_source": 0.6
+    },
+    {
+      "id": "H7.repo-context:H7.p1:contre-preuve",
+      "signal_id": "RC.governed_orchestration_present",
+      "valeur": {
+        "type": "count",
+        "unite": "artefacts"
+      },
+      "source": "RC",
+      "check_id": "H7.repo-context",
+      "path_id": "H7.p1",
+      "concept_id": "H7",
+      "axe": "H",
+      "polarite": "contre-preuve",
+      "force": "prouve",
+      "citation": "RC.multi_agent_orchestrator_count=0 artefacts ≥ 2 artefacts ; RC.evals_or_trust_tier_present=non = oui",
+      "confiance_source": 1
+    },
+    {
+      "id": "H7.session:H7.p2:contre-preuve",
+      "signal_id": "S.subagents_orchestrated",
+      "valeur": {
+        "type": "boolean",
+        "unite": ""
+      },
+      "source": "S",
+      "check_id": "H7.session",
+      "path_id": "H7.p2",
+      "concept_id": "H7",
+      "axe": "H",
+      "polarite": "contre-preuve",
+      "force": "indice",
+      "citation": "S.subagents_orchestrated=non = oui",
+      "confiance_source": 0.6
+    },
+    {
+      "id": "I2.git-activity:I2.p1:preuve",
+      "signal_id": "GA.median_correction_commits_after_open",
+      "valeur": {
+        "type": "count",
+        "unite": "commits"
+      },
+      "source": "GA",
+      "check_id": "I2.git-activity",
+      "path_id": "I2.p1",
+      "concept_id": "I2",
+      "axe": "I",
+      "polarite": "preuve",
+      "force": "prouve",
+      "citation": "GA.median_correction_commits_after_open=1 commits ≤ 3 commits",
+      "confiance_source": 1
+    },
+    {
+      "id": "I2.session:I2.p2:preuve",
+      "signal_id": "S.first_prompt_framed",
+      "valeur": {
+        "type": "boolean",
+        "unite": ""
+      },
+      "source": "S",
+      "check_id": "I2.session",
+      "path_id": "I2.p2",
+      "concept_id": "I2",
+      "axe": "I",
+      "polarite": "preuve",
+      "force": "indice",
+      "citation": "S.first_prompt_framed=oui = oui",
+      "confiance_source": 0.6
+    },
+    {
+      "id": "I3.git-activity:I3.p1:preuve",
+      "signal_id": "GA.median_correction_commits_after_open",
+      "valeur": {
+        "type": "count",
+        "unite": "commits"
+      },
+      "source": "GA",
+      "check_id": "I3.git-activity",
+      "path_id": "I3.p1",
+      "concept_id": "I3",
+      "axe": "I",
+      "polarite": "preuve",
+      "force": "prouve",
+      "citation": "GA.median_correction_commits_after_open=1 commits ≤ 1 commits",
+      "confiance_source": 1
+    },
+    {
+      "id": "I3.session:I3.p2:preuve",
+      "signal_id": "S.milestone_framing_present",
+      "valeur": {
+        "type": "boolean",
+        "unite": ""
+      },
+      "source": "S",
+      "check_id": "I3.session",
+      "path_id": "I3.p2",
+      "concept_id": "I3",
+      "axe": "I",
+      "polarite": "preuve",
+      "force": "indice",
+      "citation": "S.milestone_framing_present=oui = oui",
+      "confiance_source": 0.6
+    },
+    {
+      "id": "I4.git-activity:I4.p1:contre-preuve",
+      "signal_id": "GA.merged_without_human_edit_ratio",
+      "valeur": {
+        "type": "ratio",
+        "unite": "ratio"
+      },
+      "source": "GA",
+      "check_id": "I4.git-activity",
+      "path_id": "I4.p1",
+      "concept_id": "I4",
+      "axe": "I",
+      "polarite": "contre-preuve",
+      "force": "prouve",
+      "citation": "GA.merged_without_human_edit_ratio=0.2987012987012987 ratio ≥ 0.8 ratio ; GA.ai_coauthored_ratio=0.91 ratio ≥ 0.9 ratio (approximation : pull-requests.json absent, dénominateur = pull_requests.total (46/154))",
+      "confiance_source": 1
+    },
+    {
+      "id": "O2.git-activity:O2.p1:preuve",
+      "signal_id": "GA.prs_with_tests_ratio",
+      "valeur": {
+        "type": "ratio",
+        "unite": "ratio"
+      },
+      "source": "GA",
+      "check_id": "O2.git-activity",
+      "path_id": "O2.p1",
+      "concept_id": "O2",
+      "axe": "O",
+      "polarite": "preuve",
+      "force": "prouve",
+      "citation": "GA.prs_with_tests_ratio=0.88 ratio ≥ 0.5 ratio ; SO.coverage_non_regression=oui = oui",
+      "confiance_source": 1
+    },
+    {
+      "id": "O2.session:O2.p3:contre-preuve",
+      "signal_id": "S.tests_first_seen_failing",
+      "valeur": {
+        "type": "boolean",
+        "unite": ""
+      },
+      "source": "S",
+      "check_id": "O2.session",
+      "path_id": "O2.p3",
+      "concept_id": "O2",
+      "axe": "O",
+      "polarite": "contre-preuve",
+      "force": "indice",
+      "citation": "S.tests_first_seen_failing=non = oui",
+      "confiance_source": 0.6
+    },
+    {
+      "id": "O3.repo-context:O3.p1:preuve",
+      "signal_id": "RC.capitalization_artifact_specific_count",
+      "valeur": {
+        "type": "count",
+        "unite": "artefacts"
+      },
+      "source": "RC",
+      "check_id": "O3.repo-context",
+      "path_id": "O3.p1",
+      "concept_id": "O3",
+      "axe": "O",
+      "polarite": "preuve",
+      "force": "prouve",
+      "citation": "RC.capitalization_artifact_specific_count=2 artefacts ≥ 1 artefacts",
+      "confiance_source": 1
+    },
+    {
+      "id": "O3.session:O3.p3:preuve",
+      "signal_id": "S.context_correction_or_rca_present",
+      "valeur": {
+        "type": "boolean",
+        "unite": ""
+      },
+      "source": "S",
+      "check_id": "O3.session",
+      "path_id": "O3.p3",
+      "concept_id": "O3",
+      "axe": "O",
+      "polarite": "preuve",
+      "force": "indice",
+      "citation": "S.context_correction_or_rca_present=oui = oui",
+      "confiance_source": 0.6
+    },
+    {
+      "id": "O4.repo-context:O4.p1:preuve",
+      "signal_id": "RC.review_agent_or_approval_gate_present",
+      "valeur": {
+        "type": "boolean",
+        "unite": ""
+      },
+      "source": "RC",
+      "check_id": "O4.repo-context",
+      "path_id": "O4.p1",
+      "concept_id": "O4",
+      "axe": "O",
+      "polarite": "preuve",
+      "force": "prouve",
+      "citation": "RC.review_agent_present=non = oui ; RC.approval_gate_present=oui = oui",
+      "confiance_source": 1
+    },
+    {
+      "id": "O4.session:O4.p3:contre-preuve",
+      "signal_id": "S.ai_review_before_pr",
+      "valeur": {
+        "type": "boolean",
+        "unite": ""
+      },
+      "source": "S",
+      "check_id": "O4.session",
+      "path_id": "O4.p3",
+      "concept_id": "O4",
+      "axe": "O",
+      "polarite": "contre-preuve",
+      "force": "indice",
+      "citation": "S.ai_review_before_pr=non = oui",
+      "confiance_source": 0.6
+    },
+    {
+      "id": "O5.repo-context:O5.p1:contre-preuve",
+      "signal_id": "RC.evals_and_trust_tier_present",
+      "valeur": {
+        "type": "boolean",
+        "unite": ""
+      },
+      "source": "RC",
+      "check_id": "O5.repo-context",
+      "path_id": "O5.p1",
+      "concept_id": "O5",
+      "axe": "O",
+      "polarite": "contre-preuve",
+      "force": "prouve",
+      "citation": "RC.evals_versioned_present=non = oui ; RC.trust_tier_or_circuit_breaker_present=non = oui",
+      "confiance_source": 1
+    },
+    {
+      "id": "P2.git-activity:P2.p1:preuve",
+      "signal_id": "GA.concurrent_branches_with_isolation",
+      "valeur": {
+        "type": "count",
+        "unite": "branches"
+      },
+      "source": "GA",
+      "check_id": "P2.git-activity",
+      "path_id": "P2.p1",
+      "concept_id": "P2",
+      "axe": "P",
+      "polarite": "preuve",
+      "force": "prouve",
+      "citation": "GA.median_concurrent_branches=4 branches ≥ 2 branches ; GA.max_concurrent_branches=7 branches ≥ 2 branches ; RC.isolation_artifact_present=non = oui",
+      "confiance_source": 1
+    },
+    {
+      "id": "P2.session:P2.p2:preuve",
+      "signal_id": "S.parallel_worktrees_mentioned",
+      "valeur": {
+        "type": "boolean",
+        "unite": ""
+      },
+      "source": "S",
+      "check_id": "P2.session",
+      "path_id": "P2.p2",
+      "concept_id": "P2",
+      "axe": "P",
+      "polarite": "preuve",
+      "force": "indice",
+      "citation": "S.parallel_worktrees_mentioned=oui = oui",
+      "confiance_source": 0.6
+    },
+    {
+      "id": "P3.git-activity:P3.p1:preuve",
+      "signal_id": "GA.median_concurrent_branches",
+      "valeur": {
+        "type": "count",
+        "unite": "branches"
+      },
+      "source": "GA",
+      "check_id": "P3.git-activity",
+      "path_id": "P3.p1",
+      "concept_id": "P3",
+      "axe": "P",
+      "polarite": "preuve",
+      "force": "prouve",
+      "citation": "GA.median_concurrent_branches=4 branches ≥ 3 branches",
+      "confiance_source": 1
+    },
+    {
+      "id": "T2.git-activity:T2.p1:preuve",
+      "signal_id": "GA.size_median",
+      "valeur": {
+        "type": "enum",
+        "unite": "taille_bucket"
+      },
+      "source": "GA",
+      "check_id": "T2.git-activity",
+      "path_id": "T2.p1",
+      "concept_id": "T2",
+      "axe": "T",
+      "polarite": "preuve",
+      "force": "prouve",
+      "citation": "GA.size_median=l taille_bucket ≥ M taille_bucket",
+      "confiance_source": 1
+    },
+    {
+      "id": "T2.session:T2.p3:contre-preuve",
+      "signal_id": "S.files_touched_single_module",
+      "valeur": {
+        "type": "count",
+        "unite": "fichiers"
+      },
+      "source": "S",
+      "check_id": "T2.session",
+      "path_id": "T2.p3",
+      "concept_id": "T2",
+      "axe": "T",
+      "polarite": "contre-preuve",
+      "force": "indice",
+      "citation": "S.files_touched_single_module=1 fichiers ≥ 3 fichiers",
+      "confiance_source": 0.6
+    },
+    {
+      "id": "T3.git-activity:T3.p1:preuve",
+      "signal_id": "GA.size_median",
+      "valeur": {
+        "type": "enum",
+        "unite": "taille_bucket"
+      },
+      "source": "GA",
+      "check_id": "T3.git-activity",
+      "path_id": "T3.p1",
+      "concept_id": "T3",
+      "axe": "T",
+      "polarite": "preuve",
+      "force": "prouve",
+      "citation": "GA.size_median=l taille_bucket ≥ L taille_bucket",
+      "confiance_source": 1
+    },
+    {
+      "id": "T3.session:T3.p3:preuve",
+      "signal_id": "S.phased_plan_multi_layer",
+      "valeur": {
+        "type": "boolean",
+        "unite": ""
+      },
+      "source": "S",
+      "check_id": "T3.session",
+      "path_id": "T3.p3",
+      "concept_id": "T3",
+      "axe": "T",
+      "polarite": "preuve",
+      "force": "indice",
+      "citation": "S.has_phased_plan=oui = oui ; S.layers_touched=4 couches ≥ 2 couches",
+      "confiance_source": 0.6
+    },
+    {
+      "id": "T4.git-activity:T4.p1:preuve",
+      "signal_id": "GA.xl_ratio",
+      "valeur": {
+        "type": "ratio",
+        "unite": "ratio"
+      },
+      "source": "GA",
+      "check_id": "T4.git-activity",
+      "path_id": "T4.p1",
+      "concept_id": "T4",
+      "axe": "T",
+      "polarite": "preuve",
+      "force": "prouve",
+      "citation": "GA.xl_ratio=0.3116883116883117 ratio ≥ 0.2 ratio",
+      "confiance_source": 1
+    }
+  ],
+  "warnings": [
+    "declaratif.md [read_error] : erreur de lecture (ENOENT)",
+    "pull-requests.json [read_error] : erreur de lecture (ENOENT)"
+  ],
+  "incoherences": [
+    "T2 : sources en désaccord (GA, S) — \"GA\" retenue (précédence RC > PR > GA > SO > S > SU > DEC).",
+    "T3 : sources en désaccord (GA, S) — \"GA\" retenue (précédence RC > PR > GA > SO > S > SU > DEC).",
+    "H6 : sources en désaccord (RC, S) — \"RC\" retenue (précédence RC > PR > GA > SO > S > SU > DEC).",
+    "H7 : sources en désaccord (RC, S) — \"RC\" retenue (précédence RC > PR > GA > SO > S > SU > DEC).",
+    "I2 : sources en désaccord (GA, S) — \"GA\" retenue (précédence RC > PR > GA > SO > S > SU > DEC).",
+    "I3 : sources en désaccord (GA, S) — \"GA\" retenue (précédence RC > PR > GA > SO > S > SU > DEC).",
+    "P2 : sources en désaccord (GA, S) — \"GA\" retenue (précédence RC > PR > GA > SO > S > SU > DEC).",
+    "O2 : sources en désaccord (GA, S) — \"GA\" retenue (précédence RC > PR > GA > SO > S > SU > DEC).",
+    "O3 : sources en désaccord (RC, S) — \"RC\" retenue (précédence RC > PR > GA > SO > S > SU > DEC).",
+    "O4 : sources en désaccord (RC, S) — \"RC\" retenue (précédence RC > PR > GA > SO > S > SU > DEC)."
+  ],
+  "pieces_et_champs_ignores": [
+    {
+      "champ": "code/",
+      "raison": "contenu du code source jamais lu pour juger — détecter du « code généré par IA » n'est pas fiable (spec, Non-goals) ; seul l'inventaire de présence compte ailleurs."
+    },
+    {
+      "champ": "git-activity.json:reverted",
+      "raison": "aucune marche du référentiel ne s'appuie sur le nombre de commits revert."
+    },
+    {
+      "champ": "git-activity.json:message_convention_compliance",
+      "raison": "la conformité de convention de message de commit n'est pas un axe de la grille officielle."
+    },
+    {
+      "champ": "git-activity.json:repositories",
+      "raison": "le nombre de dépôts déclarés n'entre dans aucun seuil du référentiel (mode profil, hors dépôt réel)."
+    },
+    {
+      "champ": "git-activity.json:median_runs_to_green",
+      "raison": "mesure de volume/qualité de CI, jamais un plafond ou un axe (spec, Non-goals : qualité du code jamais plafonnante)."
+    },
+    {
+      "champ": "git-activity.json:tokens_per_week",
+      "raison": "toute mesure fondée sur le volume d'usage est hors périmètre au-delà de la simple preuve d'usage de l'IA (spec, Non-goals)."
+    }
+  ]
+}
