@@ -1,0 +1,56 @@
+{
+  "period": {
+    "from": "2026-01-15",
+    "to": "2026-07-15"
+  },
+  "repositories": 1,
+  "pull_requests": {
+    "total": 10,
+    "size_distribution": {
+      "xs": 2,
+      "s": 4,
+      "m": 3,
+      "l": 1,
+      "xl": 0
+    },
+    "median_files_changed": 2,
+    "median_lines_changed": 30,
+    "median_correction_commits_after_open": 1,
+    "merged_without_human_edit_after_open": 0,
+    "reverted": 0,
+    "median_review_comments_received": 2
+  },
+  "commits": {
+    "total": 40,
+    "median_per_pr": 4,
+    "ai_coauthored_ratio": 0,
+    "message_convention_compliance": 0.5
+  },
+  "tests": {
+    "coverage_start": 0.5,
+    "coverage_end": 0.5,
+    "prs_with_tests_ratio": 0.3
+  },
+  "parallelism": {
+    "max_concurrent_branches": 1,
+    "median_concurrent_branches": 1
+  },
+  "ci": {
+    "failure_rate": 0.1,
+    "median_runs_to_green": 1
+  },
+  "context_files": {
+    "agents_md": false,
+    "rules_count": 0,
+    "skills_count": 0,
+    "hooks_count": 0,
+    "agents_count": 0,
+    "last_updated": null
+  },
+  "assistant_usage": {
+    "declared_tools": [],
+    "editor_integration": false,
+    "sessions_per_week": 0,
+    "tokens_per_week": 0
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "_meta": {
+    "description": "Rangs attendus des 3 mutants du hold-out (Part 4, phase 4, tâche 1). Écrit et committé AVANT tout réglage de seuil dans src/referentiel.json — jamais consulté à nouveau avant la vérification finale (étape 9). Best-effort : jugement porté sur le comportement ACTUEL (non réglé) des checks au moment de la construction des mutants, pas rétro-ingénierie après coup.",
+    "written_before_threshold_tuning": true,
+    "as_of_commit_note": "Premier commit de cette phase — précède tout commit touchant src/referentiel.json dans Part 4 phase 4 (vérifiable par git log --oneline -- evals/holdout.json src/referentiel.json)."
+  },
+  "mutants": {
+    "perceval-plus-rc": {
+      "construction": "fixtures/profiles/perceval + un bundle repo-context/ synthétique (AGENTS.md spécifique, 1 règle, 1 skill, 2 fichiers de mémoire docs/context/ spécifiques et vivants) — git-activity.json inchangé.",
+      "rang_attendu": "red",
+      "fourchette_attendue": { "bas": "red", "haut": "red" },
+      "raisonnement": "T2 (marche bloquante de Blue) est prouvée par GA.size_median (médiane 's', sous le seuil 'M') indépendamment de tout artefact repo-context — ajouter un harness riche ne change aucun compteur git-activity.json. La richesse de repo-context ne peut donc pas, à elle seule, faire monter le rang au-delà de Red : exactement le principe anti-richesse, appliqué ici à l'axe Harness plutôt qu'à un profil entier.",
+      "observe_avant_reglage": "red (node dist/cli.js analyze fixtures/holdout/perceval-plus-rc --json, avant tout commit touchant referentiel.json)"
+    },
+    "bohort-sans-session": {
+      "construction": "fixtures/profiles/bohort avec session.md retiré — seule pièce enlevée.",
+      "rang_attendu": "blue",
+      "fourchette_attendue": { "bas": "blue", "haut": "blue" },
+      "raisonnement": "Toutes les marches qui déterminent le rang de bohort (T2, H2, H3, I2 pour Blue ; T3, H4, I3 pour Green, déjà infirmées) sont tranchées par GA seul chez bohort — S ne produit jamais que des indices (force 'indice', jamais 'prouve', cf. Amendement Phase 3) et ne peut donc jamais, à lui seul, avoir fait basculer une marche de l'échelle. Seule marche dont l'état change en l'absence de session.md : P2 (infirmée via S.parallel_worktrees_mentioned avec session, inconnue sans — P2 n'entre pas dans le calcul de Blue). Rang ponctuel et confiance ne doivent pas monter (monotonie par retrait d'une pièce).",
+      "observe_avant_reglage": "blue (node dist/cli.js analyze fixtures/holdout/bohort-sans-session --json, avant tout commit touchant referentiel.json)"
+    },
+    "arthur-plus-pr": {
+      "construction": "fixtures/profiles/arthur + pull-requests.json synthétique (12 PR, 11 mergées dans la fenêtre, gabarit de taille cohérent avec les agrégats git-activity.json réels d'arthur : médiane de fichiers changés et de lignes nettement au-dessus de la fenêtre 'M' de T2.p2).",
+      "rang_attendu": "red_ou_green_selon_correctif_T2",
+      "fourchette_attendue": { "bas": "red", "haut": "green" },
+      "raisonnement": "Fourchette volontairement large, jugement honnête au moment de la construction (avant tout réglage) : le comportement OBSERVÉ à cet instant est 'red', mais la cause identifiée est un défaut de conception suspecté dans T2.pull-requests.ts (contre-preuve par négation complète d'une bande fichiers/lignes, qui infirme T2 quand la PR est BEAUCOUP PLUS GROSSE que M, pas seulement plus petite — alors que le référentiel documente la contre-preuve de T2 comme '≤ S', une condition de 'trop petit', jamais de 'trop gros'). Si ce défaut est corrigé en phase 4 tâche 8 (fix de logique de check, pas de seuil), la médiane GA d'arthur (déjà ≥ M) devrait suffire seule à prouver T2 sans contradiction de la voie PR, et arthur-plus-pr devrait alors se comporter comme le arthur réel côté axe T. Ce mutant sert précisément à vérifier, à l'étape 9, que le correctif générique (non réglé sur les étalons) se généralise correctement à cette variante synthétique.",
+      "observe_avant_reglage": "red (node dist/cli.js analyze fixtures/holdout/arthur-plus-pr --json, avant tout commit touchant referentiel.json) — T2 infirmée par PR.median_files_changed/lines_changed hors bande haute, en contradiction de précédence avec GA.size_median (T2 prouvée par GA seule)."
+    }
+  }
+}

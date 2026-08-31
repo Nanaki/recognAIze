@@ -1,0 +1,17 @@
+{
+  "_meta": {
+    "description": "Fixtures négatives par path_id (Part 4, phase 4, tâche 3) — chaque (profil, marche) listé DOIT être infirmé (etat = \"infirmé\") dans le résultat du profil correspondant.",
+    "anti_richesse": "bohort doit être classé STRICTEMENT sous leodagan et sous arthur, alors même que bohort est la fixture la plus complète (session.md + pull-requests.json + repo-context/ + declaratif.md) — la richesse d'un profil ne prouve jamais un rang plus haut."
+  },
+  "negatives": [
+    { "profile": "arthur", "marche": "H6" },
+    { "profile": "leodagan", "marche": "H6" },
+    { "profile": "leodagan", "marche": "I4" },
+    { "profile": "leodagan", "marche": "P3" },
+    { "profile": "bohort", "marche": "H4" }
+  ],
+  "anti_richesse": {
+    "below": "bohort",
+    "above": ["leodagan", "arthur"]
+  }
+}

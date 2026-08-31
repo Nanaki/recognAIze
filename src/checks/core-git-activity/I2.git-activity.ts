@@ -1,0 +1,36 @@
+/**
+ * `I2.p1` (« cadre avant »). Preuve : `median_correction_commits_after_open ≤ 3`.
+ * Contre-preuve : négation complète (`> 3`) — coïncide exactement avec
+ * `I2.counter_proof` (« GA corr > 3 »).
+ */
+
+import type { Check } from "../../core/types.js";
+import { evaluateProofPathDefault, type SignalValue } from "../../lib/threshold-eval.js";
+
+const CHECK_ID = "I2.git-activity";
+const PATH_ID = "I2.p1";
+
+const check: Check = {
+  id: CHECK_ID,
+  axe: "I",
+  marche: "I2",
+  sources: ["GA"],
+  pack: "core-git-activity",
+  enabled: true,
+  path_ids: [PATH_ID],
+  run: (context, referentiel) => {
+    const signals: Record<string, SignalValue> = {
+      "GA.median_correction_commits_after_open": context.gitActivity?.pull_requests?.median_correction_commits_after_open,
+    };
+    const evidence = evaluateProofPathDefault({
+      referentiel,
+      checkId: CHECK_ID,
+      pathId: PATH_ID,
+      axe: "I",
+      signals,
+    });
+    return evidence === undefined ? [] : [evidence];
+  },
+};
+
+export default check;

@@ -1,0 +1,11 @@
+{
+  "_meta": {
+    "description": "Rangs exacts attendus des 4 étalons (Part 4, phase 4, tâche 2) — 'Justesse sur les étalons', spec."
+  },
+  "profiles": {
+    "perceval": { "rang_affiche": "red" },
+    "bohort": { "rang_affiche": "blue" },
+    "leodagan": { "rang_affiche": "green" },
+    "arthur": { "rang_affiche": "copper" }
+  }
+}

@@ -1,0 +1,1 @@
+Never commit secrets. Always keep src/core/ free of checks/ imports.

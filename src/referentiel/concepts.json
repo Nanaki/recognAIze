@@ -1,0 +1,146 @@
+[
+  {
+    "marche": "T1",
+    "description": "Marche par défaut de l'axe Taille : aucun seuil propre, acquise dès qu'une preuve d'usage de l'IA existe ailleurs dans le profil.",
+    "detail": "**Tâche S** — rang Red. Marche par défaut : aucun chemin de preuve propre,\nprouvée dès qu'une preuve d'usage de l'IA existe ailleurs dans le profil.",
+    "lien": "#concept-t1"
+  },
+  {
+    "marche": "T2",
+    "description": "Taille M habituelle : PR de quelques fichiers ou quelques centaines de lignes, portée par une session touchant plusieurs fichiers d'un même module.",
+    "detail": "**Feature M** — rang Blue.\n\n| `path_id` | Force | Source | Signal | Seuil |\n| --- | --- | --- | --- | --- |\n| `T2.p1` | prouve | `GA` | `GA.size_median` | `GA.size_median ≥ M taille_bucket` |\n| `T2.p2` | prouve | `PR` | `PR.median_files_or_lines_changed` | `(5 ≤ fichiers ≤ 12) OU (150 ≤ lignes ≤ 500)` |\n| `T2.p3` | indice | `S` | `S.files_touched_single_module` | `S.files_touched_single_module ≥ 3 fichiers` |\n| `T2.p4` | indice | `SU` | `SU.size_oriented_setup_present` | `= true` (skill/agent spécifique du repo-context orienté taille/portée — jamais une preuve, voir § Source SU) |\n\nContre-preuve : `GA`/`PR` médiane ≤ taille S (signal `GA.size_median`).",
+    "lien": "#concept-t2"
+  },
+  {
+    "marche": "T3",
+    "description": "Taille L habituelle : PR plus large ou touchant plusieurs couches, précédée d'un plan de session découpé en phases.",
+    "detail": "**Feature L planifiée** — rang Green.\n\n| `path_id` | Force | Source | Signal | Seuil |\n| --- | --- | --- | --- | --- |\n| `T3.p1` | prouve | `GA` | `GA.size_median` | `GA.size_median ≥ L taille_bucket` |\n| `T3.p2` | prouve | `PR` | `PR.median_files_or_layers_changed` | `(fichiers > 12) OU (couches ≥ 2)` |\n| `T3.p3` | indice | `S` | `S.phased_plan_multi_layer` | `S.has_phased_plan = true ET S.layers_touched ≥ 2` |\n\nContre-preuve : `GA`/`PR` médiane ≤ M (signal `GA.size_median`).",
+    "lien": "#concept-t3"
+  },
+  {
+    "marche": "T4",
+    "description": "Taille XL récurrente : une part notable des PR de la période relève du plus grand gabarit observé, pas un pic isolé.",
+    "detail": "**XL master plan** — hors ligne de montée (confirmation grossière, non-goal assumé).\n\n| `path_id` | Force | Source | Signal | Seuil |\n| --- | --- | --- | --- | --- |\n| `T4.p1` | prouve | `GA` | `GA.xl_ratio` | `GA.xl_ratio ≥ 0.2 ratio` |\n\nContre-preuve : `GA`/`PR` — aucune PR XL (signal `GA.xl_ratio`).",
+    "lien": "#concept-t4"
+  },
+  {
+    "marche": "H1",
+    "description": "Marche par défaut de l'axe Harness : aucun seuil propre, acquise dès qu'une preuve d'usage de l'IA existe ailleurs dans le profil.",
+    "detail": "**Prompts structurés** — rang Red. Marche par défaut, aucun chemin de preuve\npropre, prouvée dès qu'une preuve d'usage de l'IA existe ailleurs.",
+    "lien": "#concept-h1"
+  },
+  {
+    "marche": "H2",
+    "description": "Identité de projet formalisée : un fichier dédié décrit le projet à l'assistant et reste entretenu au fil du temps.",
+    "detail": "**Identité projet** — rang Blue.\n\n| `path_id` | Force | Source | Signal | Seuil |\n| --- | --- | --- | --- | --- |\n| `H2.p1` | prouve | `RC` | `RC.identity_file_specific` | `= true` |\n| `H2.p2` | prouve | `GA` | `GA.agents_md` | `= true` |\n\nContre-preuve : `context_files` à zéro ; `RC` fourni sans fichier d'identité.",
+    "lien": "#concept-h2"
+  },
+  {
+    "marche": "H3",
+    "description": "Mémoire vivante : au moins un fichier de mémoire spécifique existe et a été mis à jour dans la fenêtre observée.",
+    "detail": "**Mémoire vivante** — rang Blue.\n\n| `path_id` | Force | Source | Signal | Seuil |\n| --- | --- | --- | --- | --- |\n| `H3.p1` | prouve | `RC` | `RC.memory_files_specific_alive` | `RC.memory_files_specific_count ≥ 1 ET RC.memory_files_alive = true` |\n| `H3.p2` | prouve | `GA` | `GA.agents_md_maintained` | `GA.agents_md = true ET GA.agents_md_last_updated_in_window = true` |\n\nContre-preuve : `RC` fourni sans mémoire ; `last_updated` hors fenêtre.",
+    "lien": "#concept-h3"
+  },
+  {
+    "marche": "H4",
+    "description": "Comportements versionnés : au moins une règle, un skill, une commande ou un agent dédié est déclaré et suivi dans l'historique du dépôt.",
+    "detail": "**Comportements versionnés** — rang Green.\n\n| `path_id` | Force | Source | Signal | Seuil |\n| --- | --- | --- | --- | --- |\n| `H4.p1` | prouve | `RC` | `RC.behavior_artifacts_specific_count` | `≥ 1 artefacts` |\n| `H4.p2` | prouve | `GA` | `GA.rules_skills_agents_count` | `≥ 1 artefacts` |\n\nContre-preuve : `GA` à zéro et `RC` sans artefact de comportement.",
+    "lien": "#concept-h4"
+  },
+  {
+    "marche": "H5",
+    "description": "Garde-fous en place : un hook, une liste de refus, un pre-commit ou une porte de CI encadre ce que l'assistant peut faire.",
+    "detail": "**Guardrails** — rang Silver.\n\n| `path_id` | Force | Source | Signal | Seuil |\n| --- | --- | --- | --- | --- |\n| `H5.p1` | prouve | `RC` | `RC.guardrail_artifact_present` | `= true` |\n| `H5.p2` | prouve | `GA` | `GA.hooks_count` | `≥ 1 hooks` |\n\nContre-preuve : `GA.hooks_count = 0` et `RC` sans guardrail.",
+    "lien": "#concept-h5"
+  },
+  {
+    "marche": "H6",
+    "description": "Boucle exécutable : un script ou un job relance l'assistant tant qu'une vérification du projet échoue, jusqu'au vert.",
+    "detail": "**Boucles (artefact exécutable)** — rang Silver.\n\n| `path_id` | Force | Source | Signal | Seuil |\n| --- | --- | --- | --- | --- |\n| `H6.p1` | prouve | `RC` | `RC.loop_artifact_executable` | `= true` |\n| `H6.p2` | indice | `S` | `S.autonomous_retry_until_green` | `= true` |\n\nContre-preuve : `RC` fourni sans artefact exécutable.",
+    "lien": "#concept-h6"
+  },
+  {
+    "marche": "H7",
+    "description": "Orchestration gouvernée : plusieurs agents coordonnés s'appuient sur des évaluations ou des paliers de confiance versionnés.",
+    "detail": "**Orchestration gouvernée** — rang Gold, détection grossière (non-goal assumé).\n\n| `path_id` | Force | Source | Signal | Seuil |\n| --- | --- | --- | --- | --- |\n| `H7.p1` | prouve | `RC` | `RC.governed_orchestration_present` | `RC.multi_agent_orchestrator_count >= 2 ET RC.evals_or_trust_tier_present = true` |\n| `H7.p2` | indice | `S` | `S.subagents_orchestrated` | `= true` |\n\nContre-preuve : `RC` fourni sans orchestrateur.",
+    "lien": "#concept-h7"
+  },
+  {
+    "marche": "I1",
+    "description": "Marche par défaut de l'axe Intervention : aucun seuil propre, acquise dès qu'une preuve d'usage de l'IA existe ailleurs dans le profil.",
+    "detail": "**Corrige après coup** — rang Red. Marche par défaut, aucun chemin de preuve\npropre, prouvée dès qu'une preuve d'usage de l'IA existe ailleurs.",
+    "lien": "#concept-i1"
+  },
+  {
+    "marche": "I2",
+    "description": "Cadrage en amont : peu de commits correctifs après ouverture de PR, premier prompt posant déjà contexte et contraintes.",
+    "detail": "**Cadre avant** — rang Blue.\n\n| `path_id` | Force | Source | Signal | Seuil |\n| --- | --- | --- | --- | --- |\n| `I2.p1` | prouve | `GA` | `GA.median_correction_commits_after_open` | `≤ 3 commits` |\n| `I2.p2` | indice | `S` | `S.first_prompt_framed` | `= true` |\n| `I2.p3` | indice | `SU` | `SU.autonomous_framing_setup_present` | `= true` (skill/agent spécifique du repo-context cadrant l'autonomie — jamais une preuve, voir § Source SU) |\n\nContre-preuve : `GA` correctifs `> 3`.",
+    "lien": "#concept-i2"
+  },
+  {
+    "marche": "I3",
+    "description": "Intervention réservée aux étapes clés : très peu de commits correctifs, plan validé avant le début de l'implémentation.",
+    "detail": "**Aux étapes clés** — rang Green.\n\n| `path_id` | Force | Source | Signal | Seuil |\n| --- | --- | --- | --- | --- |\n| `I3.p1` | prouve | `GA` | `GA.median_correction_commits_after_open` | `≤ 1 commit` |\n| `I3.p2` | indice | `S` | `S.milestone_framing_present` | `= true` |\n\nContre-preuve : `GA` correctifs `> 1`.",
+    "lien": "#concept-i3"
+  },
+  {
+    "marche": "I4",
+    "description": "Jamais une fois cadré : la quasi-totalité des PR sont mergées sans retouche humaine, avec un co-autorat IA élevé.",
+    "detail": "**Jamais une fois cadré** — rang Silver (tranchée, prouvée ou infirmée — voir non-goals).\n\n| `path_id` | Force | Source | Signal | Seuil |\n| --- | --- | --- | --- | --- |\n| `I4.p1` | prouve | `GA` | `GA.merged_without_human_edit_ratio` | `≥ 0.8 ratio ET GA.ai_coauthored_ratio ≥ 0.9 ratio` |\n\nContre-preuve : `GA` ratio `< 0.8` ou co-autorat `< 0.9`.",
+    "lien": "#concept-i4"
+  },
+  {
+    "marche": "I5",
+    "description": "Jamais, cadrage compris : les PR sont ouvertes directement par un compte d'agent configuré, sans étape de cadrage humaine visible.",
+    "detail": "**Jamais, cadrage compris** — rang Gold, détection grossière (non-goal assumé).\n\n| `path_id` | Force | Source | Signal | Seuil |\n| --- | --- | --- | --- | --- |\n| `I5.p1` | prouve | `PR` | `PR.opened_by_configured_agent_account` | `= true` |\n\nAucune contre-preuve définie dans le référentiel (champ `counter_proof`\nabsent) — sans compte d'agent configuré dans `recognaize.config.json`, le\nsignal reste `inconnu`, jamais `infirmé`.",
+    "lien": "#concept-i5"
+  },
+  {
+    "marche": "P1",
+    "description": "Marche par défaut de l'axe Parallèle : aucun seuil propre, acquise dès qu'une preuve d'usage de l'IA existe ailleurs dans le profil.",
+    "detail": "**Un chantier** — rang Red. Marche par défaut, aucun chemin de preuve propre,\nprouvée dès qu'une preuve d'usage de l'IA existe ailleurs.",
+    "lien": "#concept-p1"
+  },
+  {
+    "marche": "P2",
+    "description": "Début de parallélisation : plusieurs branches concurrentes, avec un artefact d'isolation (worktrees ou équivalent) quand le pic reste isolé.",
+    "detail": "**Isolation & préparation** — rang Copper.\n\n| `path_id` | Force | Source | Signal | Seuil |\n| --- | --- | --- | --- | --- |\n| `P2.p1` | prouve | `GA` | `GA.concurrent_branches_with_isolation` | `(médiane ≥ 2) OU (max ≥ 2 ET RC.isolation_artifact_present = true)` |\n| `P2.p2` | indice | `S` | `S.parallel_worktrees_mentioned` | `= true` |\n\nContre-preuve : `GA.max_concurrent_branches < 2`.",
+    "lien": "#concept-p2"
+  },
+  {
+    "marche": "P3",
+    "description": "Parallélisme habituel : au moins trois branches ou PR se recouvrent dans le temps, de façon régulière et pas seulement ponctuelle.",
+    "detail": "**≥ 3 habituellement** — rang Copper.\n\n| `path_id` | Force | Source | Signal | Seuil |\n| --- | --- | --- | --- | --- |\n| `P3.p1` | prouve | `GA` | `GA.median_concurrent_branches` | `≥ 3 branches` |\n| `P3.p2` | prouve | `PR` | `PR.median_overlap_count` | `≥ 3 PR` |\n\nContre-preuve : `GA` médiane `< 3` ; `PR` recouvrement médian `< 3`.",
+    "lien": "#concept-p3"
+  },
+  {
+    "marche": "O1",
+    "description": "Marche par défaut de l'axe Ownership : aucun seuil propre, acquise dès qu'une preuve d'usage de l'IA existe ailleurs dans le profil.",
+    "detail": "**Lit avant de merger** — marche par défaut, aucun chemin de preuve propre.",
+    "lien": "#concept-o1"
+  },
+  {
+    "marche": "O2",
+    "description": "Vérifie avant de merger : PR généralement accompagnées de tests, couverture non régressée.",
+    "detail": "**Vérifie**.\n\n| `path_id` | Force | Source | Signal | Seuil |\n| --- | --- | --- | --- | --- |\n| `O2.p1` | prouve | `GA` | `GA.prs_with_tests_ratio` | `≥ 0.5 ratio ET SO.coverage_non_regression = true` |\n| `O2.p3` | indice | `S` | `S.tests_first_seen_failing` | `= true` |\n\nContre-preuve : `GA` tests `< 0.5` ou couverture en baisse.",
+    "lien": "#concept-o2"
+  },
+  {
+    "marche": "O3",
+    "description": "Comprend et capitalise : artefacts de décision ou de plan versionnés, corps de PR structurés, retours d'incident documentés.",
+    "detail": "**Comprend et capitalise**.\n\n| `path_id` | Force | Source | Signal | Seuil |\n| --- | --- | --- | --- | --- |\n| `O3.p1` | prouve | `RC` | `RC.capitalization_artifact_specific_count` | `≥ 1 artefacts` |\n| `O3.p2` | prouve | `PR` | `PR.structured_body_ratio` | `≥ 0.5 ratio` |\n| `O3.p3` | indice | `S` | `S.context_correction_or_rca_present` | `= true` |\n\nContre-preuve : `RC` fourni sans artefact et aucun body structuré.",
+    "lien": "#concept-o3"
+  },
+  {
+    "marche": "O4",
+    "description": "Délègue raisonnablement : un agent de revue ou une porte d'approbation encadre la relecture avant merge.",
+    "detail": "**Délègue raisonnablement**.\n\n| `path_id` | Force | Source | Signal | Seuil |\n| --- | --- | --- | --- | --- |\n| `O4.p1` | prouve | `RC` | `RC.review_agent_or_approval_gate_present` | `RC.review_agent_present = true OU RC.approval_gate_present = true` |\n| `O4.p3` | indice | `S` | `S.ai_review_before_pr` | `= true` |\n\nContre-preuve : `RC` fourni sans reviewer ni gate.",
+    "lien": "#concept-o4"
+  },
+  {
+    "marche": "O5",
+    "description": "Gouverne l'autonomie : des évaluations versionnées sont associées à des paliers de confiance ou un coupe-circuit.",
+    "detail": "**Gouverne l'autonomie** — détection grossière (non-goal assumé).\n\n| `path_id` | Force | Source | Signal | Seuil |\n| --- | --- | --- | --- | --- |\n| `O5.p1` | prouve | `RC` | `RC.evals_and_trust_tier_present` | `RC.evals_versioned_present = true ET RC.trust_tier_or_circuit_breaker_present = true` |\n\nContre-preuve : `RC` fourni sans evals.",
+    "lien": "#concept-o5"
+  }
+]

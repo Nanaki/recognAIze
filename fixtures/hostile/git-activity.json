@@ -1,0 +1,18 @@
+{
+  "period": {
+    "from": "2026-01-15",
+    "to": "2026-07-15"
+  },
+  "commits": {
+    "total": 10,
+    "ai_coauthored_ratio": "0.91",
+    "message_convention_compliance": 1.5
+  },
+  "pull_requests": {
+    "total": -3,
+    "size_distribution": null
+  },
+  "un_champ_du_futur_pas_encore_documente": {
+    "x": [1, 2, 3]
+  }
+}
