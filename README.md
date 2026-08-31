@@ -1,32 +1,42 @@
 # recognAIze
 
-<!-- Dépôt : Nanaki/recognAIze, privé (passage en public reste une action humaine restante, voir docs/rendu.md). Le badge ci-dessous ne rendra donc rien pour un lecteur externe tant que le dépôt n'est pas public. -->
+<!-- Dépôt privé pour l'instant : le badge ci-dessous ne s'affichera qu'une fois public. -->
 
 [![CI](https://github.com/Nanaki/recognAIze/actions/workflows/ci.yml/badge.svg)](https://github.com/Nanaki/recognAIze/actions/workflows/ci.yml)
 
 Outil CLI déterministe et sans réseau qui annonce le rang AI-Driven Development d'un profil de développeur sur la grille laivel-up (White → Gold), avec une fourchette et une confiance quand l'entrée ne suffit pas à trancher.
 
-## Quickstart
+## Installation
 
-Ces deux lignes viennent d'une exécution réelle, sur un clone frais de ce dépôt, juste avant d'écrire cette section (pas recopiées de mémoire) :
+Node ≥ 20.
 
 ```bash
-npm ci --ignore-scripts && npm run build
+npm ci --ignore-scripts
+npm run build
+```
+
+`npm run build` génère `src/checks/index.ts`, compile `dist/` et copie `referentiel.json`.
+
+## Utilisation
+
+```bash
+node dist/cli.js analyze <dossier-de-profil>
+```
+
+Exemple :
+
+```bash
 node dist/cli.js analyze fixtures/profiles/bohort
 ```
 
-`npm ci --ignore-scripts` a installé 138 paquets sans script de cycle de vie ;
-`npm run build` a généré `src/checks/index.ts` (48 checks découverts), compilé
-`dist/` et copié `referentiel.json`. La seconde commande se termine avec le
-code de sortie `0`, sans rien imprimer sur `stdout` (silence = succès), et
-écrit `recognaize-cli-out/bohort-<hash>/result.json` + `report.html` (ouvrable en
-`file://`, sans serveur). Pour voir le détail : `report.html` (fiche complète,
-lisible dans un navigateur) ou `--json` (imprime uniquement `result.json` sur
-`stdout`).
+Exit `0`, silencieux sur `stdout` (silence = succès), écrit
+`recognaize-cli-out/bohort-<hash>/{result.json,report.html}`.
 
-### Lancer les 4 profils étalons d'un coup
+- `report.html` : fiche complète, à ouvrir dans un navigateur (`file://` suffit, aucun serveur requis).
+- `--json` : imprime uniquement `result.json` sur `stdout` (n'écrit alors pas `report.html`).
+- `--out <dir>` : change le répertoire de sortie (défaut `./recognaize-cli-out`).
 
-Testé à l'instant (les 4 sortent avec le code `0`) :
+Analyser plusieurs profils : une commande par profil, ou une boucle bash simple —
 
 ```bash
 for p in fixtures/profiles/*/; do
@@ -34,19 +44,7 @@ for p in fixtures/profiles/*/; do
 done
 ```
 
-Écrit un dossier par profil sous `recognaize-cli-out/` :
-`arthur-<hash>/`, `bohort-<hash>/`, `leodagan-<hash>/`, `perceval-<hash>/` —
-chacun avec son `result.json` + `report.html`.
-
-## Ce que l'outil ne fait pas
-
-Aucun enrichissement par un modèle de langage, aucun mode entretien, aucun
-mode « dépôt git réel » (recalcul des agrégats depuis `git`/`gh`) **dans ce
-binaire** : `node dist/cli.js` ne livre que le chemin déterministe sur un
-dossier de profil déclaratif, explicitement hors périmètre, aucune clé d'API
-n'est lue par l'outil.
-
-## Codes de sortie
+### Codes de sortie
 
 | Code | Signification |
 | --- | --- |
@@ -55,51 +53,45 @@ n'est lue par l'outil.
 | `3` | Environnement non supporté (Node < 20) ou usage invalide (chemin inexistant, option inconnue) — message en français. |
 | `1` | Erreur interne — réservé aux défauts, jamais un chemin normal. |
 
-## Second outil, agentique (`scripts/agentic/`, comparatif)
+## Ce que l'outil ne fait pas
 
-Un second outil coexiste dans ce dépôt, jamais un
-remplacement du binaire ci-dessus : le même verdict, produit via des
-sous-agents Claude Code (l'outil Agent d'une session Claude Code, jamais un
-client API Anthropic provisionné séparément — aucune clé n'est lue non plus
-par ce chemin) plutôt que des checks déterministes, pour comparer les deux
-résultats. `scripts/agentic/judge-from-signals.ts` réutilise le même
-`judge()` — la logique de jugement n'est jamais dupliquée, seule l'extraction
-de signaux diffère. Calibré à un match exact sur les 5 axes des 4 étalons.
-**Contrairement au binaire déterministe, ce chemin n'a aucune garantie de
-répétabilité** : l'extraction est une lecture LLM, pas une fonction pure —
-relancer le skill sur le même profil peut légitimement changer un signal, la
-confiance, voire le rang affiché.
-Formalisé en skill Claude Code : `.claude/skills/recognaize-agentic/`
-(`/recognaize-agentic <profil>` ou en langage naturel, dans une session
-Claude Code ouverte sur ce dépôt). Écrit un rapport final consolidé dans
-`recognaize-out-final/<profil>/{verdict.json,meta.json,report.md}` — jamais dans
-`recognaize-cli-out/`, jamais écrasé par un run du CLI seul. `meta.json` porte le
-modèle utilisé et une **estimation** (jamais une mesure — l'outil `Agent` ne
-renvoie pas l'usage réel à l'orchestrateur) de tokens et de coût, toujours
-accompagnée d'une note qui le dit explicitement.
+Aucun enrichissement par un modèle de langage, aucun mode entretien, aucun
+mode « dépôt git réel » (recalcul des agrégats depuis `git`/`gh`) **dans ce
+binaire** : `node dist/cli.js` ne livre que le chemin déterministe sur un
+dossier de profil déclaratif. Aucune clé d'API n'est lue par l'outil.
+
+## Second chemin, agentique (comparatif, via Claude Code)
+
+Un second chemin vers le même verdict coexiste dans ce dépôt, jamais un
+remplacement du binaire ci-dessus : des sous-agents Claude Code (l'outil
+`Agent` d'une session Claude Code — jamais un client API Anthropic
+provisionné séparément, aucune clé n'est lue non plus par ce chemin)
+extraient les mêmes signaux qu'un check déterministe lirait, puis les
+soumettent au même juge (`judge()`, jamais dupliqué) pour comparaison.
+**Aucune garantie de répétabilité** contrairement au binaire déterministe :
+l'extraction est une lecture LLM, pas une fonction pure — relancer sur le
+même profil peut changer un signal, la confiance, voire le rang affiché.
+
+À utiliser depuis une session Claude Code ouverte sur ce dépôt (aucune clé
+d'API, aucun terminal séparé) :
+
+```
+/recognaize-agentic <dossier-de-profil>
+```
+
+Écrit `recognaize-out-final/<profil>-<hash>/{verdict.json,meta.json,report-input.json,report.html}`
+— jamais dans `recognaize-cli-out/`, jamais écrasé par un run du CLI seul.
+`report.html` est rendu par le CLI lui-même (`node dist/cli.js export`,
+même renderer que le chemin déterministe), avec un bandeau et une section
+de comparaison en plus. `meta.json` porte le modèle utilisé et une
+**estimation** (jamais une mesure — l'outil `Agent` ne renvoie pas l'usage
+réel) de tokens et de coût, toujours accompagnée d'une note qui le dit.
 Détail : `aidd_docs/memory/architecture.md` (§ Chemin agentique).
-
-### Lancer le skill agentique sur les 4 profils étalons
-
-Pas un script shell : `/recognaize-agentic` est une commande Claude Code, à
-taper telle quelle dans une session Claude Code ouverte sur ce dépôt (aucune
-clé d'API, aucun terminal séparé) — une commande par profil, jamais une
-boucle bash :
-
-```
-/recognaize-agentic fixtures/profiles/perceval
-/recognaize-agentic fixtures/profiles/bohort
-/recognaize-agentic fixtures/profiles/leodagan
-/recognaize-agentic fixtures/profiles/arthur
-```
-
-Chacune écrit `recognaize-out-final/<profil>-<hash>/`. Calibré à un match exact
-sur les 5 axes des 4 profils.
 
 ## Points de vérification (`checks list`)
 
-Sortie réelle de `node dist/cli.js checks list` sur le binaire construit
-ci-dessus (48 checks, 5 packs, aucun chemin de preuve sans check) :
+`node dist/cli.js checks list` liste les points de vérification (checks)
+enregistrés — un fichier par (marche × source), regroupés en packs :
 
 <details>
 <summary>48 checks enregistrés — cliquer pour déplier</summary>
@@ -164,7 +156,7 @@ Avertissements — chemins de preuve sans check (0) :
 `T2.setup`/`I2.setup` (source `SU`) sont des NO-OP délibérés dans ce binaire :
 ils existent pour que `T2.p4`/`I2.p3` (indice faible sur un skill/agent de
 setup déclaré, jamais une preuve) ne soient pas orphelins du registre, mais
-ne produisent jamais d'`Evidence` ici — voir § Second outil, agentique.
+ne produisent jamais d'`Evidence` ici — voir § Second chemin, agentique.
 
 Détail par marche : `node dist/cli.js checks explain <marche>` (ex. `T2`), ou
 la version documentée : `docs/referentiel.md`.
@@ -172,7 +164,7 @@ la version documentée : `docs/referentiel.md`.
 ## Méthode et référentiel
 
 - `docs/comprendre-le-verdict.md` : point d'entrée en langage simple et
-  schémas Mermaid — les 5 axes, comment les deux outils construisent un
+  schémas Mermaid — les 5 axes, comment les deux chemins construisent un
   verdict. À lire en premier si vous connaissez le sujet (AI-Driven
   Development) mais pas ce projet.
 - `METHOD.md` : une page — ce qu'on mesure, les 5 axes, le contrat `Evidence`,
@@ -183,18 +175,13 @@ la version documentée : `docs/referentiel.md`.
 
 ## Fixtures
 
-Les 4 profils étalons (`perceval`, `bohort`, `leodagan`, `arthur`) sous
-`fixtures/profiles/` viennent du dépôt public MIT
-[`ai-driven-dev/laivel-up`](https://github.com/ai-driven-dev/laivel-up), SHA
-épinglé `89b9e35208efdf1b523bdafbf8781be3a3db074a`. Détail complet (licence,
-date de copie, procédure de vérification du SHA) : `fixtures/profiles/ATTRIBUTION.md`.
-
-## Statut
-
-Chemin jury complet livré : moteur de vérification, juge,
-rapports `result.json`/`report.html`, tolérance aux profils incomplets ou
-hostiles, `npm run eval` vert. Second outil agentique livré et calibré
-(voir § Second outil, agentique). Poussé sur `Nanaki/recognAIze`
-(privé), CI verte sur les 4 jambes (Node 20/22 × Ubuntu/macOS). Reste,
-action humaine avant le rendu : rendre le dépôt public, tag `v1.0.0-rendu`
-— détail dans `docs/rendu.md`.
+Les 6 profils sous `fixtures/profiles/` viennent du dépôt public MIT
+[`ai-driven-dev/laivel-up`](https://github.com/ai-driven-dev/laivel-up).
+Quatre sont des **étalons** au rang documenté (`perceval` red, `bohort`
+blue, `leodagan` green, `arthur` copper) — utilisés par `npm run eval`
+(« 4/4 rang exact »). Deux (`venec`, `lancelot`) n'ont aucun rang documenté
+en amont : jamais ajoutés à `evals/expected.json` (inventer un rang
+violerait la garantie « jamais halluciner » de ce projet) — ils servent à
+observer le comportement de l'outil sur un profil réellement inconnu, le
+scénario jury. Détail complet (licence, SHA épinglé, procédure de
+vérification) : `fixtures/profiles/ATTRIBUTION.md`.

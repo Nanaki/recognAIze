@@ -17,7 +17,7 @@ flowchart TD
     REF[src/referentiel.json<br/>+ src/referentiel/concepts.json] --> REG[src/core/registry.ts]
     PK[src/packs.ts — 5 packs<br/>core-git-activity · core-repo-context · core-session<br/>core-declaratif vide · experimental-llm vide] --> REG
     CTX --> REG --> EV[(Evidence)]
-    EV --> J[src/core/judge.ts] --> REP[src/report/<br/>html.ts · json.ts · next-step.ts · esc.ts · atomic-write.ts · runs.ts]
+    EV --> J[src/core/judge.ts] --> REP[src/report/<br/>html.ts · json.ts · export-input.ts · next-step.ts · esc.ts · atomic-write.ts · runs.ts]
     FX[fixtures/profiles/<br/>perceval · bohort · leodagan · arthur] --> EVAL[evals/<br/>expected.json · negative.json · ablation.ts · holdout.json · anti-literal.ts]
     HOST[fixtures/hostile/ · fixtures/holdout/ · fixtures/synthetic/] --> EVAL
     EVAL --> CLI
@@ -43,24 +43,34 @@ flowchart TD
   agentique).
 - `scripts/agentic/` : `signal-contract.ts`, `signal-notes.ts`,
   `judge-from-signals.ts`, `write-final-report.ts` (écrit
-  `recognaize-out-final/<profil>/`) — le second chemin vers un verdict,
-  comparatif au chemin déterministe. `test/agentic/` : ses tests.
+  `recognaize-out-final/<profil>/{verdict.json,meta.json,report-input.json}` —
+  `report.html` est ensuite rendu par `node dist/cli.js export`, jamais par ce
+  script) — le second chemin vers un verdict, comparatif au chemin
+  déterministe. `test/agentic/` : ses tests.
 - `.claude/skills/recognaize-agentic/` : le chemin agentique formalisé en
   skill Claude Code (router + 4 actions + evals).
 - `src/lib/` : fonctions pures partagées par plusieurs checks (`median-from-buckets`,
   `quality-badge`, `repo-context-signals`, `session-signals`, `size-median-signal`,
   `threshold-eval`, `coverage-non-regression`, `ai-usage-proof`,
   `context-files-signal`, `agents-md-window`).
-- `src/report/` : `html.ts` (fiche autonome), `json.ts` (`result.json`),
-  `next-step.ts`, `esc.ts` (échappement), `atomic-write.ts`, `runs.ts`.
+- `src/report/` : `html.ts` (fiche autonome — accepte un `agenticContext`
+  optionnel pour le chemin agentique, sans effet quand absent), `json.ts`
+  (`result.json`), `export-input.ts` (schéma `--in` de la commande CLI
+  `export`, voir architecture.md § Chemin agentique), `next-step.ts`, `esc.ts`
+  (échappement), `atomic-write.ts`, `runs.ts`.
 - Aucun `src/llm/`, aucun `cache/` : l'enrichissement LLM et le cache de rejeu
   sont hors périmètre (`aidd_docs/features.md` § Hors périmètre).
 - `docs/` : `referentiel.md` (24 marches documentées), `comprendre-le-verdict.md`,
   `references/`. Documentation de pilotage (décisions, mémoire, capacités) :
   `aidd_docs/`, hors architecture produit. À la racine : `README.md`,
   `METHOD.md`, `LICENSE` (MIT).
-- `fixtures/profiles/` : les 4 étalons (MIT, attribution `ai-driven-dev/laivel-up`,
-  SHA épinglé — voir `fixtures/profiles/ATTRIBUTION.md`). `fixtures/hostile/` :
+- `fixtures/profiles/` : les 4 étalons — rang attendu documenté (MIT,
+  attribution `ai-driven-dev/laivel-up`, SHA épinglé — voir
+  `fixtures/profiles/ATTRIBUTION.md`) — plus `venec`/`lancelot`, deux profils
+  du même dépôt source SANS rang documenté (« non donné » en amont) : jamais
+  dans `evals/expected.json`, utilisés seulement en robustesse e2e
+  (`test/e2e-jury.test.ts` : exit 0, `result.json` valide, aucune valeur de
+  rang vérifiée). `fixtures/hostile/` :
   profil hostile (`<script>`, BOM, lien symbolique sortant). `fixtures/holdout/` :
   3 profils mutants (`arthur-plus-pr`, `bohort-sans-session`, `perceval-plus-rc`).
   `fixtures/synthetic/` : `multi-tool`, `no-ai-trace`.

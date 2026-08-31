@@ -13,24 +13,26 @@ Leur niveau est donné par rapport à la grille.
 | Dossier | Niveau | Ce qui rend le dossier particulier |
 | :--- | :--- | :--- |
 | `perceval` | 🔺 **Red** | Se décrit « plutôt avancé ». Ses chiffres disent autre chose |
-| `bohort` | 🔹 **Blue** | Le dossier le plus complet |
+| `bohort` | 🔹 **Blue** | Un `AGENTS.md` tenu à jour, et rien d'autre d'automatique |
 | `leodagan` | 🟢 **Green** | Pas de session de travail |
 | `arthur` | 🥉 **Copper** | Ne dit rien de lui-même. Tout est dans ce qu'il a mis en place |
+| `venec` | *non donné* | Deux fichiers. Indépendant, les dépôts sont chez ses clients |
+| `lancelot` | *non donné* | — |
 
 ---
 
 ## Ce que chacun contient
 
-| Pièce | `perceval` | `bohort` | `leodagan` | `arthur` |
-| :--- | :-: | :-: | :-: | :-: |
-| `profile.json` — qui c'est, sa stack | ✅ | ✅ | ✅ | ✅ |
-| `git-activity.json` — ce qu'il livre, à quel rythme | ✅ | ✅ | ✅ | ✅ |
-| `pull-requests.json` — sa dernière page de PR, telle que GitHub la rend | — | ✅ | ✅ | — |
-| `code/` — des fichiers de son dépôt | ✅ | ✅ | ✅ | ✅ |
-| `sonar-measures.json` — l'analyse statique de son dépôt | ✅ | ✅ | ✅ | ✅ |
-| `repo-context/` — ce qu'il a mis en place autour de l'IA | — | ✅ | ✅ | ✅ |
-| `declaratif.md` — ce qu'il dit de sa pratique | ✅ | ✅ | ✅ | — |
-| `session.md` — une session de travail, du prompt au commit | — | ✅ | — | ✅ |
+| Pièce | `perceval` | `bohort` | `leodagan` | `arthur` | `venec` | `lancelot` |
+| :--- | :-: | :-: | :-: | :-: | :-: | :-: |
+| `profile.json` — qui c'est, sa stack | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `git-activity.json` — ce qu'il livre, à quel rythme | ✅ | ✅ | ✅ | ✅ | — | ✅ |
+| `pull-requests.json` — sa dernière page de PR, telle que GitHub la rend | — | ✅ | ✅ | — | — | ✅ |
+| `code/` — des fichiers de son dépôt | ✅ | ✅ | ✅ | ✅ | — | ✅ |
+| `sonar-measures.json` — l'analyse statique de son dépôt | ✅ | ✅ | ✅ | ✅ | — | ✅ |
+| `repo-context/` — ce qu'il a mis en place autour de l'IA | — | ✅ | ✅ | ✅ | — | ✅ |
+| `declaratif.md` — ce qu'il dit de sa pratique | ✅ | ✅ | ✅ | — | — | ✅ |
+| `session.md` — une session de travail, du prompt au commit | — | ✅ | — | ✅ | ✅ | ✅ |
 
 Les autres profils n'auront pas les mêmes trous.
 

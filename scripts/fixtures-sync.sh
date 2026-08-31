@@ -2,8 +2,11 @@
 # fixtures-sync.sh
 #
 # Re-clones ai-driven-dev/laivel-up at the pinned SHA and diffs its
-# profiles/{perceval,bohort,leodagan,arthur} against fixtures/profiles/ in
-# this repo, to detect drift from the pinned upstream source.
+# profiles/{perceval,bohort,leodagan,arthur,venec,lancelot} against
+# fixtures/profiles/ in this repo, to detect drift from the pinned upstream
+# source. `venec`/`lancelot` carry no documented expected rank upstream
+# ("non donné", profiles/README.md) — never added to evals/expected.json,
+# see fixtures/profiles/ATTRIBUTION.md.
 #
 # Exit 0: fixtures match the pinned SHA (no drift).
 # Exit 1: fixtures differ from the pinned SHA (drift detected) — the diff is
@@ -14,8 +17,8 @@
 set -euo pipefail
 
 REPO_URL="https://github.com/ai-driven-dev/laivel-up.git"
-PINNED_SHA="89b9e35208efdf1b523bdafbf8781be3a3db074a"
-PROFILES=(perceval bohort leodagan arthur)
+PINNED_SHA="b5e966164195db9f6a2656d9b7a8478123f4e5be"
+PROFILES=(perceval bohort leodagan arthur venec lancelot)
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"

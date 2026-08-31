@@ -177,6 +177,23 @@ describe("chemin jury : node dist/cli.js sur un clone frais", () => {
       dir: () => join(tmpRepoDir, "fixtures", "hostile"),
       expectedExit: 0,
     },
+    // `venec`/`lancelot` : deux profils du même dépôt source
+    // (ai-driven-dev/laivel-up) SANS rang documenté en amont ("non donné",
+    // voir fixtures/profiles/ATTRIBUTION.md) — jamais dans `standardProfiles`
+    // ni `evals/expected.json` (inventer un rang violerait la garantie
+    // "jamais halluciner"). Robustesse seulement : la CLI ne doit jamais
+    // planter sur un profil réellement inconnu, y compris très sparse
+    // (`venec` : profile.json + session.md seulement).
+    {
+      label: "venec (profil aveugle, sparse)",
+      dir: () => join(tmpRepoDir, "fixtures", "profiles", "venec"),
+      expectedExit: 0,
+    },
+    {
+      label: "lancelot (profil aveugle, complet)",
+      dir: () => join(tmpRepoDir, "fixtures", "profiles", "lancelot"),
+      expectedExit: 0,
+    },
   ];
 
   test.for(cases)("$label -> exit $expectedExit, result.json JSON valide", ({ dir, expectedExit }) => {
@@ -231,6 +248,31 @@ describe("chemin jury : node dist/cli.js sur un clone frais", () => {
     expect(html.length).toBeGreaterThan(0);
     expect(html).toContain("<!doctype html>");
     expect(html).not.toMatch(/https?:\/\//);
+  });
+
+  /**
+   * Même garantie que ci-dessus, pour `venec`/`lancelot` — deux profils sans
+   * rang documenté (voir `cases` plus haut) : `report.html` doit s'écrire
+   * sans planter même sur un profil réellement inconnu, jamais un
+   * `undefined`/`null`/`NaN` visible — jamais une vérification de rang ici,
+   * qui n'existe pas en amont.
+   */
+  test.for(["venec", "lancelot"] as const)("%s (profil aveugle) : report.html écrit, sans undefined/null/NaN", (name) => {
+    const outDir = makeScratchDir("recognaize-e2e-report-html-blind-");
+    const run = runCli(["analyze", join(tmpRepoDir, "fixtures", "profiles", name), "--out", outDir]);
+    expect(run.status).toBe(0);
+
+    const subjectDirs = readdirSync(outDir);
+    expect(subjectDirs).toHaveLength(1);
+    const reportPath = join(outDir, subjectDirs[0] ?? "", "report.html");
+    const html = readFileSync(reportPath, "utf8");
+
+    expect(html.length).toBeGreaterThan(0);
+    expect(html).toContain("<!doctype html>");
+    expect(html).not.toMatch(/https?:\/\//);
+    expect(html).not.toContain("undefined");
+    expect(html).not.toMatch(/>null</);
+    expect(html).not.toContain("NaN");
   });
 
   /**
