@@ -48,7 +48,7 @@
 
 import type { AxisJudgement, OwnershipJudgement } from "../core/judge.js";
 import type { Referentiel } from "../core/referentiel.js";
-import type { AxeId, Etat, Evidence, Fourchette, Rang, SourceId, Verdict } from "../core/types.js";
+import type { AxeId, Confiance, Etat, Evidence, Fourchette, Rang, SourceId, Verdict } from "../core/types.js";
 import { RANGS_ORDONNES } from "../core/types.js";
 import { computeQualityBadge, type QualityBadge } from "../lib/quality-badge.js";
 import type { DeclaratifData } from "../sources/declaratif.js";
@@ -857,6 +857,188 @@ function renderListSection(title: string, items: readonly string[], emptyText: s
 }
 
 // ---------------------------------------------------------------------------
+// Chemin agentique — bandeau et section de comparaison au chemin déterministe
+//
+// Second chemin comparatif, jamais un remplacement (aidd_docs/memory/architecture.md
+// § Chemin agentique) : ce `report.html` reste celui du VERDICT AGENTIQUE
+// (`document` = le document jugé agentique, comme pour tout appel de
+// `buildReportHtml`) — `agenticContext` n'ajoute que la comparaison au
+// verdict déterministe, jamais un second document complet. Absent
+// (`undefined`, seul cas pour le chemin déterministe lui-même) ⇒ les deux
+// fonctions ci-dessous rendent `""` : zéro octet de différence avec le
+// `report.html` déjà golden-testé du chemin déterministe.
+// ---------------------------------------------------------------------------
+
+/** Sous-ensemble de `AxisJudgement` nécessaire à la table de confiance par axe côté déterministe. */
+export interface AgenticAxisConfidence {
+  readonly axe: AxeId;
+  readonly niveau_prouve: string | null;
+  readonly confiance: Confiance;
+}
+
+export interface AgenticComparisonRow {
+  readonly axe: AxeId;
+  readonly deterministic: string | null;
+  readonly agentic: string | null;
+  readonly match: boolean;
+}
+
+export interface AgenticTokenEstimate {
+  readonly prompt_chars: number;
+  readonly output_chars: number;
+  readonly estimated_tokens: number;
+  readonly note: string;
+}
+
+export interface AgenticCostEstimate {
+  readonly usd: number;
+  readonly note: string;
+}
+
+/**
+ * Contexte de comparaison au chemin déterministe — jamais un second
+ * renderer : un seul paramètre optionnel de {@link buildReportHtml}. Le côté
+ * AGENTIQUE de la comparaison n'a pas besoin d'être répété ici : c'est déjà
+ * `document` (le `ResultDocument` rendu par cet appel).
+ */
+export interface AgenticContext {
+  readonly deterministic: {
+    readonly rang_affiche: Rang | null;
+    readonly fourchette: Fourchette;
+    readonly confiance_globale: Confiance;
+    readonly axes: readonly AgenticAxisConfidence[];
+    readonly incoherences: readonly string[];
+  };
+  readonly comparison: {
+    readonly rows: readonly AgenticComparisonRow[];
+    readonly mismatch_notes: readonly string[];
+  };
+  readonly execution: {
+    readonly model: string;
+    readonly token_estimate: AgenticTokenEstimate;
+    readonly cost_estimate: AgenticCostEstimate;
+    readonly generated_at: string;
+  };
+}
+
+interface IncoherenceDiff {
+  readonly common: readonly string[];
+  readonly deterministicOnly: readonly string[];
+  readonly agenticOnly: readonly string[];
+}
+
+/**
+ * Diff pur de deux listes d'incohérences — jamais l'ordre d'itération d'un
+ * `Set`/`Map` en sortie (seulement pour le test d'appartenance) : l'ordre de
+ * chaque liste résultat reste celui de sa liste source, pour un rendu
+ * déterministe même entrée deux fois.
+ */
+function diffIncoherences(deterministic: readonly string[], agentic: readonly string[]): IncoherenceDiff {
+  const agenticSet = new Set(agentic);
+  const deterministicSet = new Set(deterministic);
+  return {
+    common: deterministic.filter((item) => agenticSet.has(item)),
+    deterministicOnly: deterministic.filter((item) => !agenticSet.has(item)),
+    agenticOnly: agentic.filter((item) => !deterministicSet.has(item)),
+  };
+}
+
+/**
+ * Retourne `""` (jamais un bloc vide avec des sauts de ligne parasites) si
+ * `agenticContext` est absent — un `${...}` de gabarit qui interpolerait une
+ * chaîne vide laisserait quand même son propre saut de ligne environnant ;
+ * la chaîne non vide se termine donc elle-même par `\n`, pour que le
+ * gabarit appelant n'ait besoin d'aucun saut de ligne supplémentaire autour
+ * du placeholder (byte-identique au chemin déterministe quand absent).
+ */
+function renderAgenticBanner(agenticContext: AgenticContext | undefined): string {
+  if (!agenticContext) return "";
+  return `<div class="agentic-banner" role="note">
+  <strong>Verdict AGENTIQUE</strong> — produit par des sous-agents LLM (modèle ${esc(agenticContext.execution.model)}), comparé ci-dessous au chemin déterministe (<code>node dist/cli.js analyze</code>). Reproductibilité NON garantie d'une exécution à l'autre : l'extraction relit du texte brut à chaque run, contrairement au rendu de cette page.
+</div>
+`;
+}
+
+function renderDiffList(items: readonly string[]): string {
+  return items.length === 0 ? "<p>(aucune)</p>" : `<ul>\n${items.map((item) => `  <li>${esc(item)}</li>`).join("\n")}\n</ul>`;
+}
+
+function formatConfidence(confiance: number | undefined): string {
+  return typeof confiance === "number" ? confiance.toFixed(2) : "—";
+}
+
+function formatConfidenceDelta(deterministic: number | undefined, agentic: number | undefined): string {
+  if (typeof deterministic !== "number" || typeof agentic !== "number") return "—";
+  const delta = agentic - deterministic;
+  if (delta === 0) return "=";
+  return `${delta > 0 ? "+" : ""}${delta.toFixed(2)}`;
+}
+
+/** Section « Comparaison au chemin déterministe » — retourne `""` si `agenticContext` est absent. */
+function renderAgenticComparisonSection(document: ResultDocument, agenticContext: AgenticContext | undefined): string {
+  if (!agenticContext) return "";
+  const { deterministic, comparison, execution } = agenticContext;
+  const deterministicAxisByAxe = new Map(deterministic.axes.map((axis) => [axis.axe, axis]));
+  const agenticAxisByAxe = new Map(document.axes.map((axis) => [axis.axe, axis]));
+
+  const comparisonRows = comparison.rows
+    .map(
+      (row) =>
+        `<tr><td>${esc(row.axe)}</td><td>${esc(row.deterministic ?? "—")}</td><td>${esc(row.agentic ?? "—")}</td><td>${row.match ? "oui" : "non"}</td></tr>`,
+    )
+    .join("\n");
+
+  const confidenceRows = OFFICIAL_AXES
+    .map((axeId) => {
+      const detConfiance = deterministicAxisByAxe.get(axeId)?.confiance;
+      const agConfiance = agenticAxisByAxe.get(axeId)?.confiance;
+      return `<tr><td>${esc(axeId)}</td><td>${formatConfidence(detConfiance)}</td><td>${formatConfidence(agConfiance)}</td><td>${esc(formatConfidenceDelta(detConfiance, agConfiance))}</td></tr>`;
+    })
+    .join("\n");
+
+  const diff = diffIncoherences(deterministic.incoherences, document.incoherences);
+
+  const mismatchBlock =
+    comparison.mismatch_notes.length === 0
+      ? "<p>Aucun désaccord entre les deux chemins sur ce profil.</p>"
+      : `<ul>\n${comparison.mismatch_notes.map((note) => `  <li>${esc(note)}</li>`).join("\n")}\n</ul>`;
+
+  return `<section class="agentic-comparison" aria-label="Comparaison au chemin déterministe">
+  <h2>Comparaison au chemin déterministe</h2>
+  <h3>Rang par axe</h3>
+  <table class="agentic-table">
+    <thead><tr><th>Axe</th><th>Déterministe</th><th>Agentique</th><th>Concordance</th></tr></thead>
+    <tbody>
+${comparisonRows}
+    </tbody>
+  </table>
+  <h3>Désaccords</h3>
+  ${mismatchBlock}
+  <h3>Confiance par axe</h3>
+  <table class="agentic-table">
+    <thead><tr><th>Axe</th><th>Déterministe</th><th>Agentique</th><th>Delta</th></tr></thead>
+    <tbody>
+${confidenceRows}
+    </tbody>
+  </table>
+  <h3>Incohérences — comparaison</h3>
+  <p>Communes aux deux chemins (${diff.common.length}) :</p>
+  ${renderDiffList(diff.common)}
+  <p>Seulement côté déterministe (${diff.deterministicOnly.length}) :</p>
+  ${renderDiffList(diff.deterministicOnly)}
+  <p>Seulement côté agentique (${diff.agenticOnly.length}) :</p>
+  ${renderDiffList(diff.agenticOnly)}
+  <h3>Exécution (estimation, jamais une mesure)</h3>
+  <dl>
+    <dt>Modèle</dt><dd>${esc(execution.model)}</dd>
+    <dt>Tokens estimés</dt><dd>~${esc(String(execution.token_estimate.estimated_tokens))} (${esc(String(execution.token_estimate.prompt_chars))} caractères de prompt + ${esc(String(execution.token_estimate.output_chars))} caractères de réponse). ${esc(execution.token_estimate.note)}</dd>
+    <dt>Coût estimé</dt><dd>~$${esc(String(execution.cost_estimate.usd))}. ${esc(execution.cost_estimate.note)}</dd>
+    <dt>Généré le</dt><dd>${esc(execution.generated_at)}</dd>
+  </dl>
+</section>`;
+}
+
+// ---------------------------------------------------------------------------
 // En-tête et pied de page
 // ---------------------------------------------------------------------------
 
@@ -1253,6 +1435,27 @@ details.axis-detail[open] > summary { margin-bottom: 0.4rem; }
 .concept-detail__table th, .concept-detail__table td { border: 1px solid var(--border); padding: 0.3rem 0.5rem; text-align: left; vertical-align: top; }
 .concept-detail__table th { white-space: nowrap; }
 .concept-detail__table th { background: rgba(43, 58, 103, 0.06); }
+
+/* Chemin agentique — bandeau et section de comparaison, rendus SEULEMENT quand
+   agenticContext est fourni (report.html du chemin déterministe : aucun de ces
+   sélecteurs ne matche jamais rien). */
+.agentic-banner {
+  background: rgba(181, 101, 29, 0.12);
+  border: 1px solid var(--declare);
+  border-radius: 8px;
+  padding: 0.8rem 1.2rem;
+  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
+}
+.agentic-banner strong { color: var(--declare); }
+.agentic-comparison h3 { font-size: 0.85rem; margin: 1.2rem 0 0.5rem; }
+.agentic-comparison h3:first-of-type { margin-top: 0; }
+.agentic-table { border-collapse: collapse; width: 100%; margin: 0 0 0.6rem; font-size: 0.82rem; }
+.agentic-table th, .agentic-table td { border: 1px solid var(--border); padding: 0.35rem 0.6rem; text-align: left; vertical-align: top; }
+.agentic-table th { background: rgba(43, 58, 103, 0.06); white-space: nowrap; }
+.agentic-comparison dl { margin: 0; }
+.agentic-comparison dt { font-weight: 600; margin-top: 0.5rem; }
+.agentic-comparison dd { margin: 0.1rem 0 0; }
 `;
 
 // ---------------------------------------------------------------------------
@@ -1264,13 +1467,17 @@ details.axis-detail[open] > summary { margin-bottom: 0.4rem; }
  * fichier pour `referentiel`/`extras`. `concepts` (optionnel) alimente les
  * liens de fiche et les blocs « prochaine marche » ; absent (`undefined`) ⇒
  * replis textuels partout, jamais un crash ni un lien cassé (même posture que
- * `ReportExtras`, chaque champ optionnel).
+ * `ReportExtras`, chaque champ optionnel). `agenticContext` (optionnel) ajoute
+ * le bandeau et la section de comparaison au chemin déterministe (voir
+ * {@link AgenticContext}) — absent pour tout appel de `src/cli.ts analyze`
+ * (chemin déterministe), donc sans le moindre effet sur son rendu.
  */
 export function buildReportHtml(
   document: ResultDocument,
   referentiel: Referentiel,
   extras: ReportExtras = {},
   concepts?: ConceptsIndex,
+  agenticContext?: AgenticContext,
 ): string {
   const referentielIndex = indexReferentiel(referentiel);
   const evidenceByPathId = indexEvidenceByPathId(document.evidence);
@@ -1313,7 +1520,14 @@ export function buildReportHtml(
   const mirrorSection = renderMirrorSection(extras.declaratif, document);
   const qualitySection = renderQualityBadgeSection(extras.gitActivity, extras.sonarMeasures);
   const incoherencesSection = renderListSection("Incohérences", document.incoherences, "Aucune incohérence détectée entre les sources.");
+  // `agenticComparisonSection` est `""` pour tout appel sans `agenticContext` (chemin
+  // déterministe) — jointe via `.filter(Boolean)` plutôt qu'un `${...}\n${...}` littéral,
+  // pour ne jamais laisser de ligne vide parasite dans ce cas (byte-identique à avant).
+  const agenticComparisonSection = renderAgenticComparisonSection(document, agenticContext);
   const conceptAnnexSection = renderConceptAnnex(concepts);
+  const postIncoherencesSections = [incoherencesSection, agenticComparisonSection, conceptAnnexSection]
+    .filter((section) => section.length > 0)
+    .join("\n");
   // `document.warnings[]` n'est PAS rendu dans `report.html` (contrairement
   // aux incohérences) : certains avertissements décrivent en PROSE une valeur
   // JSON malformée reçue du profil (ex. `git-activity.json [invalid_field] :
@@ -1333,7 +1547,7 @@ export function buildReportHtml(
 </head>
 <body>
 <main>
-<div class="verdict-glance-row">
+${renderAgenticBanner(agenticContext)}<div class="verdict-glance-row">
 ${renderHeader(document)}
 ${glanceSection}
 </div>
@@ -1361,8 +1575,7 @@ ${axisPanels}
 ${missingSection}
 ${mirrorSection}
 ${qualitySection}
-${incoherencesSection}
-${conceptAnnexSection}
+${postIncoherencesSections}
 </div>
 </div>
 </main>
@@ -1379,7 +1592,8 @@ export function writeReportHtml(
   referentiel: Referentiel,
   extras: ReportExtras = {},
   concepts?: ConceptsIndex,
+  agenticContext?: AgenticContext,
 ): void {
-  const html = buildReportHtml(document, referentiel, extras, concepts);
+  const html = buildReportHtml(document, referentiel, extras, concepts, agenticContext);
   atomicWriteFileSync(`${outputDir}/report.html`, html);
 }

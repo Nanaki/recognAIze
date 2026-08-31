@@ -21,7 +21,15 @@ interface BridgeResult {
   readonly axes: ReadonlyArray<{ readonly axe: string; readonly etats: ReadonlyArray<{ readonly marche: string; readonly etat: string }> }>;
 }
 
-function runBridge(signals: Record<string, unknown>): { result: BridgeResult; evidence_count: number } {
+interface BridgeEvidence {
+  readonly id: string;
+  readonly axe: string;
+  readonly path_id: string;
+  readonly source: string;
+  readonly check_id: string;
+}
+
+function runBridge(signals: Record<string, unknown>): { result: BridgeResult; evidence_count: number; evidence: readonly BridgeEvidence[] } {
   const out = execFileSync("npx", ["tsx", scriptPath], {
     cwd: repoRoot,
     input: JSON.stringify({ signals }),
@@ -92,6 +100,54 @@ describe("scripts/agentic/judge-from-signals.ts", () => {
     const { result } = runBridge({ "GA.ai_coauthored_ratio": 0.87, "GA.xl_ratio": 0 });
     const axeT = result.axes.find((a) => a.axe === "T");
     expect(axeT?.etats.find((e) => e.marche === "T4")?.etat).toBe("infirmé");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// `evidence` (en plus de `evidence_count`) : nécessaire à `write-final-report.ts`
+// (action 04) pour construire le `document` du mode `export` de la CLI — voir
+// `aidd_docs/tasks/2026_08/2026_08_31_agentic-report-html-parity/phase-2.md`.
+// ---------------------------------------------------------------------------
+
+describe("scripts/agentic/judge-from-signals.ts : champ evidence (AC, phase 2)", () => {
+  it("evidence[] non vide dès qu'un chemin de preuve est déterminable, et sa longueur == evidence_count", () => {
+    const { result, evidence, evidence_count } = runBridge({ "GA.ai_coauthored_ratio": 0.58 });
+    void result;
+    expect(evidence.length).toBeGreaterThan(0);
+    expect(evidence).toHaveLength(evidence_count);
+  });
+
+  it("aucun signal ⇒ evidence[] vide, jamais une entrée inventée", () => {
+    const { evidence, evidence_count } = runBridge({});
+    expect(evidence).toEqual([]);
+    expect(evidence_count).toBe(0);
+  });
+
+  it("chaque entrée porte le vocabulaire attendu (axe/path_id/source/check_id), jamais un champ manquant silencieux", () => {
+    const { evidence } = runBridge({ "GA.ai_coauthored_ratio": 0.58, "GA.size_median": "M", "PR.median_files_changed": 8 });
+    expect(evidence.length).toBeGreaterThan(0);
+    for (const entry of evidence) {
+      expect(entry.id.length).toBeGreaterThan(0);
+      expect(entry.axe.length).toBeGreaterThan(0);
+      expect(entry.path_id.length).toBeGreaterThan(0);
+      expect(entry.check_id).toContain("agentic:");
+    }
+  });
+
+  it("evidence[] triée déterministe (axe, marche, source, check_id) — même ordre que report/json.ts.sortEvidence", () => {
+    const { evidence } = runBridge({
+      "GA.ai_coauthored_ratio": 0.58,
+      "GA.size_median": "M",
+      "PR.median_files_changed": 8,
+      "GA.agents_md": true,
+    });
+    const sortedCopy = [...evidence].sort(
+      (a, b) => a.axe.localeCompare(b.axe) || a.path_id.localeCompare(b.path_id) || a.source.localeCompare(b.source) || a.check_id.localeCompare(b.check_id),
+    );
+    // Comparaison par points de code ASCII simples (axes/ids restent tous en
+    // ASCII majuscule) — suffisant pour vérifier l'ordre sans dépendre de
+    // `localeCompare`/`Intl` dans ce test lui-même.
+    expect(evidence.map((e) => e.id)).toEqual(sortedCopy.map((e) => e.id));
   });
 });
 

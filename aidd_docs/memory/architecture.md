@@ -91,24 +91,53 @@ flowchart LR
     NOTES[signal-notes.ts<br/>pièges calibrés] --> EXTRACT
     EXTRACT --> SIGNALS[(dict signal_id → valeur)]
     SIGNALS --> BRIDGE[judge-from-signals.ts]
-    BRIDGE -->|evaluateProofPathDefault + judge, réutilisés| VERDICT[verdict agentique]
+    BRIDGE -->|evaluateProofPathDefault + judge, réutilisés| VERDICT[verdict agentique + evidence]
     DET[verdict CLI déterministe] -.compare à.-> VERDICT
     VERDICT --> FINAL[write-final-report.ts]
     DET --> FINAL
-    FINAL --> OUTFINAL[(recognaize-out-final/profil_id/<br/>verdict.json · meta.json · report.md)]
+    FINAL --> VJSON[(verdict.json · meta.json)]
+    FINAL --> RINPUT[(report-input.json)]
+    RINPUT --> EXPORT["node dist/cli.js export<br/>(src/report/html.ts, réutilisé)"]
+    EXPORT --> OUTFINAL[(recognaize-out-final/profil_id/<br/>verdict.json · meta.json · report-input.json · report.html)]
 ```
 
 - `signal-contract.ts` dérive le contrat réel par axe depuis l'arbre
   `thresholds` du référentiel — jamais depuis `proof_paths[].signal_id`
   (étiquette simplifiée, peut cacher un signal composé).
 - `judge-from-signals.ts` ne duplique jamais la logique de jugement : même
-  `evaluateProofPathDefault`, même `judge()` que le CLI.
-- `write-final-report.ts` (action 04 du skill) écrit le
-  rapport final consolidé dans `recognaize-out-final/<profile_id>/` — jamais dans
-  `recognaize-cli-out/`, jamais à l'intérieur du dossier de profil analysé (même
-  garde-fou `resolveSubjectOutputDir` que le CLI). `profile_id` est repris tel
-  quel du `result.json` déterministe, jamais recalculé, pour que les deux
-  dossiers de sortie correspondent exactement pour un même run.
+  `evaluateProofPathDefault`, même `judge()` que le CLI. Sa sortie porte aussi
+  `evidence[]` (tableau complet, trié comme `report/json.ts`.`sortEvidence`),
+  en plus de `evidence_count` — nécessaire à `write-final-report.ts` pour
+  construire le document du mode `export`.
+- `write-final-report.ts` (action 04 du skill) écrit
+  `verdict.json`/`meta.json` (inchangés) et `report-input.json` dans
+  `recognaize-out-final/<profile_id>/` — jamais dans `recognaize-cli-out/`, jamais
+  à l'intérieur du dossier de profil analysé (même garde-fou
+  `resolveSubjectOutputDir` que le CLI). `profile_id` est repris tel quel du
+  `result.json` déterministe, jamais recalculé, pour que les deux dossiers de
+  sortie correspondent exactement pour un même run — **jamais réassaini non
+  plus** : `core/paths.ts`.`sanitizeSubject` n'est pas idempotente (le hash
+  dépend de la chaîne reçue), le réappliquer à un `profile_id` déjà assaini
+  écrirait dans un second dossier (bug réel trouvé et corrigé en vérification
+  bout-en-bout, 2026-08-31 — `src/report/export-input.ts` valide désormais que
+  `document.profile_id` est déjà en forme `sanitizeSubject`, `src/cli.ts` ne le
+  réassainit plus).
+- `write-final-report.ts` n'écrit plus de rapport Markdown fait main : le
+  skill (action 04, dernière étape) appelle ensuite
+  `node dist/cli.js export --in report-input.json --out recognaize-out-final
+  --profile-dir <profile_dir>` — un mode CLI qui rend `report.html` à partir de
+  données déjà jugées, sans réanalyse, en réutilisant `src/report/html.ts` tel
+  quel pour le rendu de base et son paramètre optionnel `agenticContext`
+  (bandeau + comparaison par axe + delta de confiance + diff des incohérences)
+  pour la partie comparative. Un seul renderer HTML dans tout le dépôt, jamais
+  un second dans `scripts/agentic/`. `agenticContext` absent (chemin
+  déterministe, `analyze`) ⇒ zéro effet sur le rendu, verrouillé par
+  `test/report.snapshot.test.ts`.
+- Le **rendu** (`export`, `report/html.ts`) est déterministe et testé (même
+  entrée → `report.html` byte-identique) ; le **pipeline agentique complet**
+  (extraction LLM incluse, actions 01-03) ne l'est PAS et ne prétend pas
+  l'être (voir la note de non-déterminisme plus bas) — la variabilité reste
+  confinée à l'extraction, jamais introduite par le rendu.
 - Modèle/tokens/coût dans `meta.json` : le modèle est un fait connu de la
   session ; tokens et coût sont des **estimations** (règle de 3 : ~4
   caractères/token), jamais une mesure — l'outil `Agent` ne renvoie aucune

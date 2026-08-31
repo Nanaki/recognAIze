@@ -14,7 +14,7 @@ Runs recognAIze's secondary, agentic verdict path on a developer profile: five p
 | 01  | `prepare-analysis`     | Run the deterministic baseline, build the 5 per-axis contracts       | `profile_dir`                                      |
 | 02  | `extract-signals`      | Launch 5 parallel extractor sub-agents, merge into one signal dict   | `contracts`, `profile_dir`                         |
 | 03  | `judge-and-compare`    | Judge the merged signals, compare against the deterministic result   | `signals`, `deterministic_result_path`             |
-| 04  | `write-final-report`   | Write the consolidated final report to `recognaize-out-final/<profile_id>/`     | `agentic` (03's output), `comparison`, `deterministic_result_path`, `profile_dir` |
+| 04  | `write-final-report`   | Write the consolidated final report (`report.html`, via the CLI's own renderer) to `recognaize-out-final/<profile_id>/`     | `agentic` (03's output), `comparison`, `deterministic_result_path`, `profile_dir` |
 
 ## Default flow
 
@@ -40,7 +40,9 @@ Sequential skill: `01 → 02 → 03 → 04`. No skipping - `02` needs `01`'s con
 - `scripts/agentic/signal-contract.ts` - derives the real per-axis signal contract from `src/referentiel.json`'s `thresholds` tree (shared source of truth, never copied)
 - `scripts/agentic/signal-notes.ts` - calibration notes per signal_id (proxies, naming pitfalls) discovered empirically against the 4 reference profiles
 - `scripts/agentic/judge-from-signals.ts` - the deterministic bridge from a signal dictionary to a full judge verdict, reusing the CLI's own judge unchanged
-- `scripts/agentic/write-final-report.ts` - writes `recognaize-out-final/<profile_id>/{verdict.json,meta.json,report.md}` from `03`'s judged verdict, the comparison, and the orchestrator-supplied model/token/cost estimate - assembles and writes only, never judges
-- `test/agentic/judge-from-signals.test.ts` - regression tests for the bridge's two documented judging exceptions (T2.p2/T3.p2 never counter-prove; T4.p1 only counter-proves at exactly `xl_ratio = 0`)
-- `test/agentic/write-final-report.test.ts` - regression tests for `04`'s file-writing contract (profile_id-named output dir, never inside `recognaize-cli-out/`, never inside the analyzed profile dir, every mismatch surfaced)
+- `scripts/agentic/write-final-report.ts` - writes `recognaize-out-final/<profile_id>/{verdict.json,meta.json,report-input.json}` from `03`'s judged verdict, the comparison, and the orchestrator-supplied model/token/cost estimate - assembles and writes only, never judges, never renders HTML. `report-input.json` is the `--in` payload for the CLI's `export` mode (`src/report/export-input.ts`), which `04` then invokes to produce `report.html` - the same renderer (`src/report/html.ts`) as the deterministic CLI, never a second one
+- `src/report/export-input.ts` / `node dist/cli.js export` - the CLI's export mode this skill calls in `04`'s last step: renders `report.html` from already-judged data (no re-analysis), reusing `src/report/html.ts`'s optional `agenticContext` parameter (banner + comparison section) for the fields this skill supplies
+- `test/agentic/judge-from-signals.test.ts` - regression tests for the bridge's two documented judging exceptions (T2.p2/T3.p2 never counter-prove; T4.p1 only counter-proves at exactly `xl_ratio = 0`) and for its `evidence[]` output (needed to build `report-input.json`'s judged document)
+- `test/agentic/write-final-report.test.ts` - regression tests for `04`'s file-writing contract (profile_id-named output dir, never inside `recognaize-cli-out/`, never inside the analyzed profile dir, every mismatch surfaced) and for the real chain into `node dist/cli.js export`
+- `test/report.export-input.test.ts` / `test/report.agentic-context.test.ts` / `test/cli.export.test.ts` - CLI-side tests (not agentic-specific) covering the `export` mode's input schema, the `report/html.ts` agentic section, and the `export` command end to end
 - `fixtures/profiles/{perceval,bohort,leodagan,arthur}/` - the 4 calibrated reference profiles (expected ranks: red, blue, green, copper) used to validate this skill's actions

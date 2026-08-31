@@ -231,6 +231,27 @@ details.axis-detail[open] > summary { margin-bottom: 0.4rem; }
 .concept-detail__table th, .concept-detail__table td { border: 1px solid var(--border); padding: 0.3rem 0.5rem; text-align: left; vertical-align: top; }
 .concept-detail__table th { white-space: nowrap; }
 .concept-detail__table th { background: rgba(43, 58, 103, 0.06); }
+
+/* Chemin agentique — bandeau et section de comparaison, rendus SEULEMENT quand
+   agenticContext est fourni (report.html du chemin déterministe : aucun de ces
+   sélecteurs ne matche jamais rien). */
+.agentic-banner {
+  background: rgba(181, 101, 29, 0.12);
+  border: 1px solid var(--declare);
+  border-radius: 8px;
+  padding: 0.8rem 1.2rem;
+  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
+}
+.agentic-banner strong { color: var(--declare); }
+.agentic-comparison h3 { font-size: 0.85rem; margin: 1.2rem 0 0.5rem; }
+.agentic-comparison h3:first-of-type { margin-top: 0; }
+.agentic-table { border-collapse: collapse; width: 100%; margin: 0 0 0.6rem; font-size: 0.82rem; }
+.agentic-table th, .agentic-table td { border: 1px solid var(--border); padding: 0.35rem 0.6rem; text-align: left; vertical-align: top; }
+.agentic-table th { background: rgba(43, 58, 103, 0.06); white-space: nowrap; }
+.agentic-comparison dl { margin: 0; }
+.agentic-comparison dt { font-weight: 600; margin-top: 0.5rem; }
+.agentic-comparison dd { margin: 0.1rem 0 0; }
 </style>
 </head>
 <body>
@@ -1571,6 +1592,27 @@ details.axis-detail[open] > summary { margin-bottom: 0.4rem; }
 .concept-detail__table th, .concept-detail__table td { border: 1px solid var(--border); padding: 0.3rem 0.5rem; text-align: left; vertical-align: top; }
 .concept-detail__table th { white-space: nowrap; }
 .concept-detail__table th { background: rgba(43, 58, 103, 0.06); }
+
+/* Chemin agentique — bandeau et section de comparaison, rendus SEULEMENT quand
+   agenticContext est fourni (report.html du chemin déterministe : aucun de ces
+   sélecteurs ne matche jamais rien). */
+.agentic-banner {
+  background: rgba(181, 101, 29, 0.12);
+  border: 1px solid var(--declare);
+  border-radius: 8px;
+  padding: 0.8rem 1.2rem;
+  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
+}
+.agentic-banner strong { color: var(--declare); }
+.agentic-comparison h3 { font-size: 0.85rem; margin: 1.2rem 0 0.5rem; }
+.agentic-comparison h3:first-of-type { margin-top: 0; }
+.agentic-table { border-collapse: collapse; width: 100%; margin: 0 0 0.6rem; font-size: 0.82rem; }
+.agentic-table th, .agentic-table td { border: 1px solid var(--border); padding: 0.35rem 0.6rem; text-align: left; vertical-align: top; }
+.agentic-table th { background: rgba(43, 58, 103, 0.06); white-space: nowrap; }
+.agentic-comparison dl { margin: 0; }
+.agentic-comparison dt { font-weight: 600; margin-top: 0.5rem; }
+.agentic-comparison dd { margin: 0.1rem 0 0; }
 </style>
 </head>
 <body>
@@ -2943,6 +2985,27 @@ details.axis-detail[open] > summary { margin-bottom: 0.4rem; }
 .concept-detail__table th, .concept-detail__table td { border: 1px solid var(--border); padding: 0.3rem 0.5rem; text-align: left; vertical-align: top; }
 .concept-detail__table th { white-space: nowrap; }
 .concept-detail__table th { background: rgba(43, 58, 103, 0.06); }
+
+/* Chemin agentique — bandeau et section de comparaison, rendus SEULEMENT quand
+   agenticContext est fourni (report.html du chemin déterministe : aucun de ces
+   sélecteurs ne matche jamais rien). */
+.agentic-banner {
+  background: rgba(181, 101, 29, 0.12);
+  border: 1px solid var(--declare);
+  border-radius: 8px;
+  padding: 0.8rem 1.2rem;
+  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
+}
+.agentic-banner strong { color: var(--declare); }
+.agentic-comparison h3 { font-size: 0.85rem; margin: 1.2rem 0 0.5rem; }
+.agentic-comparison h3:first-of-type { margin-top: 0; }
+.agentic-table { border-collapse: collapse; width: 100%; margin: 0 0 0.6rem; font-size: 0.82rem; }
+.agentic-table th, .agentic-table td { border: 1px solid var(--border); padding: 0.35rem 0.6rem; text-align: left; vertical-align: top; }
+.agentic-table th { background: rgba(43, 58, 103, 0.06); white-space: nowrap; }
+.agentic-comparison dl { margin: 0; }
+.agentic-comparison dt { font-weight: 600; margin-top: 0.5rem; }
+.agentic-comparison dd { margin: 0.1rem 0 0; }
 </style>
 </head>
 <body>
@@ -4222,6 +4285,27 @@ details.axis-detail[open] > summary { margin-bottom: 0.4rem; }
 .concept-detail__table th, .concept-detail__table td { border: 1px solid var(--border); padding: 0.3rem 0.5rem; text-align: left; vertical-align: top; }
 .concept-detail__table th { white-space: nowrap; }
 .concept-detail__table th { background: rgba(43, 58, 103, 0.06); }
+
+/* Chemin agentique — bandeau et section de comparaison, rendus SEULEMENT quand
+   agenticContext est fourni (report.html du chemin déterministe : aucun de ces
+   sélecteurs ne matche jamais rien). */
+.agentic-banner {
+  background: rgba(181, 101, 29, 0.12);
+  border: 1px solid var(--declare);
+  border-radius: 8px;
+  padding: 0.8rem 1.2rem;
+  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
+}
+.agentic-banner strong { color: var(--declare); }
+.agentic-comparison h3 { font-size: 0.85rem; margin: 1.2rem 0 0.5rem; }
+.agentic-comparison h3:first-of-type { margin-top: 0; }
+.agentic-table { border-collapse: collapse; width: 100%; margin: 0 0 0.6rem; font-size: 0.82rem; }
+.agentic-table th, .agentic-table td { border: 1px solid var(--border); padding: 0.35rem 0.6rem; text-align: left; vertical-align: top; }
+.agentic-table th { background: rgba(43, 58, 103, 0.06); white-space: nowrap; }
+.agentic-comparison dl { margin: 0; }
+.agentic-comparison dt { font-weight: 600; margin-top: 0.5rem; }
+.agentic-comparison dd { margin: 0.1rem 0 0; }
 </style>
 </head>
 <body>
@@ -5535,6 +5619,27 @@ details.axis-detail[open] > summary { margin-bottom: 0.4rem; }
 .concept-detail__table th, .concept-detail__table td { border: 1px solid var(--border); padding: 0.3rem 0.5rem; text-align: left; vertical-align: top; }
 .concept-detail__table th { white-space: nowrap; }
 .concept-detail__table th { background: rgba(43, 58, 103, 0.06); }
+
+/* Chemin agentique — bandeau et section de comparaison, rendus SEULEMENT quand
+   agenticContext est fourni (report.html du chemin déterministe : aucun de ces
+   sélecteurs ne matche jamais rien). */
+.agentic-banner {
+  background: rgba(181, 101, 29, 0.12);
+  border: 1px solid var(--declare);
+  border-radius: 8px;
+  padding: 0.8rem 1.2rem;
+  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
+}
+.agentic-banner strong { color: var(--declare); }
+.agentic-comparison h3 { font-size: 0.85rem; margin: 1.2rem 0 0.5rem; }
+.agentic-comparison h3:first-of-type { margin-top: 0; }
+.agentic-table { border-collapse: collapse; width: 100%; margin: 0 0 0.6rem; font-size: 0.82rem; }
+.agentic-table th, .agentic-table td { border: 1px solid var(--border); padding: 0.35rem 0.6rem; text-align: left; vertical-align: top; }
+.agentic-table th { background: rgba(43, 58, 103, 0.06); white-space: nowrap; }
+.agentic-comparison dl { margin: 0; }
+.agentic-comparison dt { font-weight: 600; margin-top: 0.5rem; }
+.agentic-comparison dd { margin: 0.1rem 0 0; }
 </style>
 </head>
 <body>
@@ -6167,6 +6272,27 @@ details.axis-detail[open] > summary { margin-bottom: 0.4rem; }
 .concept-detail__table th, .concept-detail__table td { border: 1px solid var(--border); padding: 0.3rem 0.5rem; text-align: left; vertical-align: top; }
 .concept-detail__table th { white-space: nowrap; }
 .concept-detail__table th { background: rgba(43, 58, 103, 0.06); }
+
+/* Chemin agentique — bandeau et section de comparaison, rendus SEULEMENT quand
+   agenticContext est fourni (report.html du chemin déterministe : aucun de ces
+   sélecteurs ne matche jamais rien). */
+.agentic-banner {
+  background: rgba(181, 101, 29, 0.12);
+  border: 1px solid var(--declare);
+  border-radius: 8px;
+  padding: 0.8rem 1.2rem;
+  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
+}
+.agentic-banner strong { color: var(--declare); }
+.agentic-comparison h3 { font-size: 0.85rem; margin: 1.2rem 0 0.5rem; }
+.agentic-comparison h3:first-of-type { margin-top: 0; }
+.agentic-table { border-collapse: collapse; width: 100%; margin: 0 0 0.6rem; font-size: 0.82rem; }
+.agentic-table th, .agentic-table td { border: 1px solid var(--border); padding: 0.35rem 0.6rem; text-align: left; vertical-align: top; }
+.agentic-table th { background: rgba(43, 58, 103, 0.06); white-space: nowrap; }
+.agentic-comparison dl { margin: 0; }
+.agentic-comparison dt { font-weight: 600; margin-top: 0.5rem; }
+.agentic-comparison dd { margin: 0.1rem 0 0; }
 </style>
 </head>
 <body>

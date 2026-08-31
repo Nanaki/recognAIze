@@ -51,6 +51,7 @@ import { loadReferentiel } from "../../src/core/referentiel.js";
 import { evaluateProofPathDefault, type SignalValue } from "../../src/lib/threshold-eval.js";
 import { judge } from "../../src/core/judge.js";
 import type { Evidence, AxeId, SourceId } from "../../src/core/types.js";
+import { sortEvidence } from "../../src/report/json.js";
 
 interface AgenticInput {
   readonly signals: Readonly<Record<string, SignalValue>>;
@@ -142,7 +143,13 @@ function main(): void {
   const hasAiUsageProof = hasAiUsageProofFromSignals(input.signals);
   const referenceSourcesPresentes = referenceSourcesPresentesFrom(input.signals);
   const result = judge({ referentiel, evidence, hasAiUsageProof, referenceSourcesPresentes });
-  process.stdout.write(JSON.stringify({ result, evidence_count: evidence.length }, null, 2) + "\n");
+  // `evidence` (en plus de `evidence_count`, déjà là) : nécessaire à
+  // `write-final-report.ts` (action 04) pour construire le `document` du mode
+  // `export` de la CLI (`report/export-input.ts`) — trié comme le fait déjà
+  // `result.json` (`sortEvidence`, `report/json.ts`), jamais un second tri
+  // réimplémenté ici, pour un rendu déterministe même entrée deux fois.
+  const sortedEvidence = sortEvidence(evidence);
+  process.stdout.write(JSON.stringify({ result, evidence_count: evidence.length, evidence: sortedEvidence }, null, 2) + "\n");
 }
 
 main();

@@ -7,9 +7,10 @@ scope: all
 
 # Testing Guidelines
 
-> État : réel, vérifié contre le dépôt. 1326 tests verts (`npm test` : 1307
-> sur le chemin déterministe + `npm test test/agentic/` : 19 sur le pont
-> agentique et le rapport final agentique), `npm run eval` 4/4 rang exact.
+> État : réel, vérifié contre le dépôt. 1375 tests verts (`npm test` : 1351
+> sur le chemin déterministe, dont le mode `export` de la CLI (§ Chemin
+> agentique) + `npm test test/agentic/` : 24 sur le pont agentique et le
+> rapport final agentique), `npm run eval` 4/4 rang exact.
 
 La fiabilité prime sur le délai (DEC-001, `ADR.md`) ; exit 1 est un défaut.
 
@@ -54,21 +55,50 @@ renvoient des signaux, jamais un jugement ; `scripts/agentic/judge-from-signals.
 réutilise `evaluateProofPathDefault`/`judge()` du chemin déterministe sans
 dupliquer la logique.
 
-- `test/agentic/judge-from-signals.test.ts` (9 tests) : teste UNIQUEMENT le pont
+- `test/agentic/judge-from-signals.test.ts` (13 tests) : teste UNIQUEMENT le pont
   (signal_id → Evidence → verdict) — jamais l'extraction LLM elle-même, non
   automatisable (aucun oracle). Deux régressions verrouillées : `T2.p2`/`T3.p2`
   ne contre-prouvent jamais (voie PR) ; `T4.p1` ne contre-prouve qu'à
-  `xl_ratio` exactement `0`. Déterminisme testé aussi pour ce pont (mêmes
-  signaux deux fois → sortie strictement identique, y compris avec les clés
-  du JSON d'entrée dans un ordre différent), même garantie que le chemin CLI
-  (`test/report.snapshot.test.ts`, hostile-determinism).
-- `test/agentic/write-final-report.test.ts` (10 tests) :
+  `xl_ratio` exactement `0`. Couvre aussi le champ `evidence[]` (en plus de
+  `evidence_count`, ajouté pour alimenter `report-input.json`) : présence,
+  vocabulaire (`axe`/`path_id`/`check_id`), tri déterministe `(axe, marche,
+  source, check_id)` identique à `report/json.ts`.`sortEvidence`. Déterminisme
+  testé aussi pour ce pont (mêmes signaux deux fois → sortie strictement
+  identique, y compris avec les clés du JSON d'entrée dans un ordre
+  différent), même garantie que le chemin CLI (`test/report.snapshot.test.ts`,
+  hostile-determinism).
+- `test/agentic/write-final-report.test.ts` (11 tests) :
   teste `scripts/agentic/write-final-report.ts` — écrit
-  `recognaize-out-final/<profil>/{verdict.json,meta.json,report.md}`, jamais
-  `recognaize-cli-out/`, jamais dans le dossier de profil analysé (même
-  garde-fou que le CLI). Comprend un test de déterminisme (même entrée deux
-  fois → fichiers strictement identiques) et un test isolant `generated_at`
-  comme seul horodatage non-déterministe du script.
+  `recognaize-out-final/<profil>/{verdict.json,meta.json,report-input.json}`,
+  jamais `report.md` (retiré, voir § Chemin agentique de
+  `architecture.md`), jamais `recognaize-cli-out/`, jamais dans le dossier de
+  profil analysé (même garde-fou que le CLI). Comprend un test de
+  déterminisme (même entrée deux fois → fichiers strictement identiques), un
+  test isolant `generated_at` comme seul horodatage non-déterministe du
+  script, et un test de CHAÎNE RÉELLE (`write-final-report.ts` →
+  `node dist/cli.js export`) qui verrouille la compatibilité des deux scripts
+  dans le temps — jamais seulement le schéma testé isolément.
+- Mode `export` de la CLI (`src/report/export-input.ts`, `src/cli.ts`) —
+  ajouté pour que le chemin agentique produise un `report.html` dans EXACTEMENT
+  le même format que le chemin déterministe, sans réimplémenter de renderer :
+  - `test/report.export-input.test.ts` (24 tests) : contract test du schéma
+    `--in` (champ manquant, type invalide, `evidence` vide acceptée). Verrouille
+    une régression réelle trouvée en vérification bout-en-bout (2026-08-31) :
+    `profile_id` doit déjà être en forme `sanitizeSubject` (`slug-hash`) —
+    accepter puis réassainir un `profile_id` déjà assaini écrirait dans un
+    second dossier, différent de celui du run déterministe du même profil
+    (`sanitizeSubject` n'est pas idempotente).
+  - `test/report.agentic-context.test.ts` (9 tests) : `agenticContext`
+    (paramètre optionnel de `buildReportHtml`) absent ⇒ aucune trace dans le
+    DOM (le CSS statique associé reste présent, sans effet — voir
+    `test/report.snapshot.test.ts`) ; présent ⇒ bandeau, comparaison par axe,
+    delta de confiance, diff des incohérences, aucun `undefined`/`null`/`NaN`,
+    rendu déterministe.
+  - `test/cli.export.test.ts` (11 tests) : e2e sur le binaire construit —
+    entrée valide (avec/sans `--profile-dir`, avec/sans `agentic_context`),
+    entrée invalide (exit 3), garde-fou `--out`/`--profile-dir`, déterminisme,
+    et la régression `profile_id` ci-dessus au niveau CLI (dossier de sortie
+    EXACTEMENT `<out>/<profile_id>`).
 - Calibration de l'extraction LLM : validée par essais en direct (pas de test
   automatisé possible), match exact sur les 5 axes des 4 étalons, reproduit
   depuis un état propre. `scripts/agentic/signal-notes.ts` capitalise chaque

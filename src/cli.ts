@@ -18,7 +18,7 @@
 // exit code Node par défaut, potentiellement confondu avec l'exit 1 réservé
 // aux erreurs internes).
 
-import { existsSync, statSync } from "node:fs";
+import { existsSync, readFileSync, statSync } from "node:fs";
 import { basename, resolve } from "node:path";
 
 import { Command, CommanderError } from "commander";
@@ -44,11 +44,22 @@ import { buildRegistry, type DiscoveredCheckFile, type Registry } from "./core/r
 import { writeProvisionalResult, writeResultDocument } from "./core/resultWriter.js";
 import { ALL_CHECKS } from "./packs.js";
 import { runAnalysis } from "./analyze.js";
-import { buildResultDocument } from "./report/json.js";
+import {
+  buildResultDocument,
+  IGNORED_FIELDS,
+  readToolVersion,
+  RESULT_SCHEMA_VERSION,
+  sortEvidence,
+  type AsOfField,
+  type ResultDocument,
+} from "./report/json.js";
 import { writeReportHtml, type ReportExtras } from "./report/html.js";
+import { parseExportInput, type ExportInput } from "./report/export-input.js";
 import { writeRunHistory } from "./report/runs.js";
 import { loadConcepts, type ConceptsIndex } from "./report/next-step.js";
 import { allMarcheIds, explainMarche, explainMarcheForProfile, formatExplanation } from "./report/explain.js";
+import { loadGitActivity } from "./sources/git-activity.js";
+import { loadSonarMeasures } from "./sources/sonar.js";
 
 /**
  * `EPIPE` sur stdout (lecteur fermé tôt, ex. `| head -1`) ne doit jamais
@@ -172,6 +183,123 @@ function runAnalyze(inputPath: string, options: AnalyzeOptions): void {
   }
 }
 
+interface ExportOptions {
+  in: string;
+  out: string;
+  profileDir?: string;
+}
+
+/**
+ * `export --in <fichier> --out <dir> [--profile-dir <dir>]` : rend `report.html`
+ * à partir de données DÉJÀ JUGÉES (voir `report/export-input.ts`), sans
+ * réanalyse — le second chemin (agentique) l'utilise pour produire un rapport
+ * au même format que celui du chemin déterministe, jamais un second renderer
+ * (`aidd_docs/memory/architecture.md` § Chemin agentique).
+ *
+ * Les champs administratifs de `result.json` (`schema_version`/`tool_version`/
+ * `referentiel_hash`/`node_version`/`pieces_et_champs_ignores`) sont recalculés
+ * ICI exactement comme `buildResultDocument` (jamais fournis par l'appelant) —
+ * pour ne jamais risquer une désynchronisation avec le référentiel réellement
+ * chargé par ce process.
+ *
+ * `--profile-dir`, s'il est fourni, dérive `ReportExtras.gitActivity`/
+ * `sonarMeasures` via les adaptateurs déjà existants (`sources/git-activity.ts`,
+ * `sources/sonar.ts`) — `declaratif.md` n'est jamais lu (DEC-004, structurel :
+ * `export-input.ts` n'offre même pas de champ pour l'y glisser via `--in`).
+ * Le même garde-fou que `analyze` (`resolveSubjectOutputDir`) interdit un
+ * `--out` à l'intérieur de `--profile-dir`.
+ */
+function runExport(options: ExportOptions): void {
+  const inAbs = resolve(options.in);
+  if (!existsSync(inAbs)) {
+    throw new UsageError(`Chemin inexistant : ${options.in}`);
+  }
+
+  let raw: unknown;
+  try {
+    raw = JSON.parse(readFileSync(inAbs, "utf8"));
+  } catch (cause) {
+    const detail = cause instanceof Error ? cause.message : String(cause);
+    throw new UsageError(`Entrée --in illisible ou JSON invalide (${options.in}) : ${detail}`);
+  }
+
+  const parsed = parseExportInput(raw);
+  if (!parsed.ok) {
+    throw new UsageError(parsed.error);
+  }
+  const input: ExportInput = parsed.data;
+
+  let profileDirAbs: string | undefined;
+  if (options.profileDir !== undefined) {
+    profileDirAbs = resolve(options.profileDir);
+    if (!existsSync(profileDirAbs)) {
+      throw new UsageError(`Chemin de profil inexistant : ${options.profileDir}`);
+    }
+    if (!statSync(profileDirAbs).isDirectory()) {
+      throw new UsageError(`Chemin de profil invalide : ${options.profileDir} n'est pas un dossier.`);
+    }
+  }
+
+  // `input.document.profile_id` est DÉJÀ assaini (validé par `ExportInputSchema`,
+  // forme `sanitizeSubject`) — ne jamais le réassainir : `sanitizeSubject` n'est
+  // pas idempotente (le hash dépend de la chaîne reçue), le réappliquer changerait
+  // le nom du dossier de sortie pour un profil déjà connu du chemin déterministe.
+  const subjectId = input.document.profile_id;
+  const outputDir =
+    profileDirAbs !== undefined
+      ? resolveSubjectOutputDir(options.out, profileDirAbs, subjectId)
+      : resolve(options.out, subjectId);
+
+  const { referentiel, referentiel_hash: referentielHash } = loadReferentiel();
+
+  let extras: ReportExtras = {};
+  if (profileDirAbs !== undefined) {
+    const gitActivity = loadGitActivity(profileDirAbs);
+    const sonarMeasures = loadSonarMeasures(profileDirAbs);
+    extras = {
+      ...(gitActivity.ok ? { gitActivity: gitActivity.data } : {}),
+      ...(sonarMeasures.ok ? { sonarMeasures: sonarMeasures.data } : {}),
+    };
+    // `declaratif.md` : jamais lu ici, volontairement (voir docstring ci-dessus).
+  }
+
+  const asOf: AsOfField = input.document.as_of ?? {
+    status: "unknown",
+    reason: "non fourni par l'appelant du mode export.",
+  };
+
+  const document: ResultDocument = {
+    schema_version: RESULT_SCHEMA_VERSION,
+    tool_version: readToolVersion(),
+    referentiel_hash: referentielHash,
+    node_version: process.versions.node,
+    as_of: asOf,
+    profile_id: input.document.profile_id,
+    status: input.document.status,
+    rang_prouve: input.document.rang_prouve,
+    rang_ponctuel: input.document.rang_ponctuel,
+    rang_affiche: input.document.rang_affiche,
+    fourchette: input.document.fourchette,
+    confiance_globale: input.document.confiance_globale,
+    axes: input.document.axes,
+    ownership: input.document.ownership,
+    verdicts: input.document.verdicts,
+    evidence: sortEvidence(input.document.evidence),
+    warnings: input.document.warnings,
+    incoherences: input.document.incoherences,
+    pieces_et_champs_ignores: IGNORED_FIELDS,
+  };
+
+  let concepts: ConceptsIndex | undefined;
+  try {
+    concepts = loadConcepts();
+  } catch {
+    concepts = undefined;
+  }
+
+  writeReportHtml(outputDir, document, referentiel, extras, concepts, input.agentic_context);
+}
+
 /** Formate le registre pour `checks list` — déterministe : aucun accès horloge/locale/cwd. */
 function formatChecksList(registry: Registry): string {
   const lines: string[] = [];
@@ -289,6 +417,16 @@ function buildProgram(): Command {
     .option("--as-of <date>", "date de référence, pour le déterminisme")
     .action((inputPath: string, options: AnalyzeOptions) => {
       runAnalyze(inputPath, options);
+    });
+
+  program
+    .command("export")
+    .description("Rend report.html à partir de données déjà jugées (--in), sans réanalyse.")
+    .requiredOption("--in <file>", "chemin du fichier JSON d'entrée (document jugé + agentic_context optionnel)")
+    .requiredOption("--out <dir>", "répertoire de sortie")
+    .option("--profile-dir <dir>", "dossier de profil, pour dériver git-activity.json/sonar-measures.json (jamais declaratif.md)")
+    .action((options: ExportOptions) => {
+      runExport(options);
     });
 
   const checksCmd = program.command("checks").description("Inspecte le référentiel de vérification.");
