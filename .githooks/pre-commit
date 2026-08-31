@@ -1,0 +1,58 @@
+#!/usr/bin/env bash
+# recognAIze pre-commit hook.
+#
+# Enforced locally (activated via `git config core.hooksPath .githooks`) and
+# mirrored by CI:
+#   1. typecheck  (tsc --noEmit)                — skipped, not failed, while src/ is empty
+#   2. lint       (eslint .)
+#   3. unit tests (vitest related, best-effort)  — skipped, not failed, while no *.test.ts exist
+#   4. secret scan (gitleaks protect --staged)   — WARNS instead of failing if gitleaks is
+#      not installed on this machine. This step is a LOCAL, BEST-EFFORT convenience
+#      only when gitleaks happens to be installed here — by itself it is NOT a
+#      guarantee that no secret reaches the remote. The real gate is the "secrets" job
+#      in .github/workflows/ci.yml, which installs the gitleaks binary itself and runs
+#      unconditionally. Installing gitleaks locally is still worth doing (catches a
+#      leak before it's even committed), but it is not a substitute for the CI gate,
+#      and this hook must never claim CI enforces something it doesn't actually run.
+#      See .claude/rules/fiabilite.md and aidd_docs/memory/vcs.md ("Aucune clé ni
+#      secret, jamais, dans aucun commit").
+#
+# "Skip" only ever applies to the "nothing exists yet to check" case (no src/**/*.ts,
+# no test/**/*.test.ts). Once those files exist, the corresponding step is fully
+# enforced and a real failure blocks the commit.
+
+set -euo pipefail
+cd "$(git rev-parse --show-toplevel)"
+
+echo "[pre-commit] 1/4 typecheck (tsc --noEmit -p tsconfig.test.json)"
+if find src -type f -name '*.ts' 2>/dev/null | grep -q .; then
+  npx tsc --noEmit -p tsconfig.test.json
+else
+  echo "[pre-commit]     no src/**/*.ts yet — skipping typecheck"
+fi
+
+echo "[pre-commit] 2/4 lint (eslint .)"
+npx eslint .
+
+echo "[pre-commit] 3/4 tests (vitest related, best-effort)"
+if find test -type f -name '*.test.ts' 2>/dev/null | grep -q .; then
+  mapfile -t staged < <(git diff --cached --name-only --diff-filter=ACMR)
+  if [ "${#staged[@]}" -gt 0 ]; then
+    npx vitest related "${staged[@]}" --run
+  else
+    echo "[pre-commit]     no staged files — skipping vitest related"
+  fi
+else
+  echo "[pre-commit]     no test/**/*.test.ts yet — skipping vitest related"
+fi
+
+echo "[pre-commit] 4/4 secret scan (gitleaks protect --staged)"
+if command -v gitleaks >/dev/null 2>&1; then
+  gitleaks protect --staged --redact
+else
+  echo "[pre-commit]     WARNING: gitleaks is not installed on this machine — local secret scan SKIPPED." >&2
+  echo "[pre-commit]     WARNING: this is a LOCAL, best-effort check only — install gitleaks to catch a leak before it's even committed." >&2
+  echo "[pre-commit]     WARNING: the real gate is the \"secrets\" job in .github/workflows/ci.yml, once this branch is pushed." >&2
+fi
+
+echo "[pre-commit] all checks passed"

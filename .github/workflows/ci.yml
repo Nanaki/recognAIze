@@ -1,0 +1,90 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  # 🤖 Amendment (independent review, 2026-08-29, "LINT/TYPECHECK ABSENTS DE LA
+  # CI"): `npm run lint` and `npm run typecheck` existed, were green locally,
+  # and enforced only by the LOCAL pre-commit hook (.githooks/pre-commit) —
+  # never by CI. That contradicted `.claude/rules/fiabilite.md` ("CI is the
+  # gate of truth"): a contributor who skips or bypasses the local hook could
+  # merge code that violates every determinism rule wired into
+  # `eslint.config.js` without CI ever noticing. Added as real steps of this
+  # job (not a separate one) so they run for every leg of the matrix below,
+  # before Build — same commands as the local hook, so "green locally" and
+  # "green in CI" mean the same thing.
+  build-test-eval:
+    name: typecheck, lint, build, test, eval (${{ matrix.os }}, node ${{ matrix.node-version }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        node-version: [20, 22]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: npm
+
+      - name: Install dependencies (no lifecycle scripts)
+        run: npm ci --ignore-scripts
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build
+        run: npm run build
+
+      - name: Test
+        run: npm test
+
+      - name: Eval
+        run: npm run eval
+
+  # 🤖 Amendment (independent review, 2026-08-29, "AUCUNE GATE SECRETS RÉELLE"):
+  # .githooks/pre-commit used to claim "CI must run gitleaks on every push" while
+  # this file had no gitleaks step at all — a false claim about CI, now corrected
+  # in the hook's own comments/warnings. This job makes that claim true: it
+  # installs the gitleaks binary directly from its GitHub release (pinned exact
+  # version, sha256-verified against the release's own checksums file — no
+  # network access beyond that one download, no gitleaks-action from the
+  # Marketplace, no license requirement), then scans the FULL git history
+  # (--log-opts="--all", same invocation documented as the required human action
+  # in docs/rendu.md) rather than only the working tree, so a secret buried in an
+  # old commit still fails the build.
+  secrets:
+    name: secret scan (gitleaks)
+    runs-on: ubuntu-latest
+    env:
+      GITLEAKS_VERSION: "8.30.1"
+    steps:
+      - name: Checkout (full history)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install gitleaks (pinned binary, checksum-verified)
+        run: |
+          set -euo pipefail
+          asset="gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
+          base_url="https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}"
+          curl -sSfL -o "$asset" "${base_url}/${asset}"
+          curl -sSfL -o checksums.txt "${base_url}/gitleaks_${GITLEAKS_VERSION}_checksums.txt"
+          grep " ${asset}\$" checksums.txt | sha256sum -c -
+          tar -xzf "$asset" gitleaks
+          chmod +x gitleaks
+          sudo mv gitleaks /usr/local/bin/gitleaks
+          gitleaks version
+
+      - name: gitleaks detect (full history, redacted output)
+        run: gitleaks detect --source . --log-opts="--all" --redact --exit-code 1

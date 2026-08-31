@@ -1,0 +1,20 @@
+# dependencies
+node_modules/
+
+# build output
+dist/
+
+# tool output (never write inside the analyzed profile folder — see spec)
+recognaize-cli-out/
+recognaize-out-final/
+
+# secrets
+.env
+.env.local
+.env.*.local
+
+# misc
+*.tmp
+
+# Claude Code session runtime state (local, per-session, never project content)
+.claude/scheduled_tasks.lock
