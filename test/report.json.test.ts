@@ -15,7 +15,7 @@ import { fileURLToPath } from "node:url";
 import { afterEach, describe, expect, test } from "vitest";
 
 import { runAnalysis } from "../src/analyze.js";
-import type { Evidence } from "../src/core/types.js";
+import type { Evidence, Rang } from "../src/core/types.js";
 import {
   IGNORED_FIELDS,
   RESULT_SCHEMA_VERSION,
@@ -226,7 +226,7 @@ describe("writeRunHistory : archive runs/<horodatage>.json + delta (tâche 5)", 
     expect(files).toContain(outcome.runFilename.replace(/\.json$/, ".delta.json"));
   });
 
-  test("deuxième run comparable : delta calculé vs le précédent (même sujet, même schema_version)", async () => {
+  test("deuxième run comparable, MÊME entrée : delta vide (« unchanged »), jamais un champ par champ rempli de changed:false", async () => {
     const subjectDir = makeScratchDir("recognaize-runs-second-");
     const first = fakeArthurDocument();
     const firstOutcome = writeRunHistory(subjectDir, first);
@@ -237,16 +237,46 @@ describe("writeRunHistory : archive runs/<horodatage>.json + delta (tâche 5)", 
     // correct même à égalité — dernier fichier lu par ordre alphabétique).
     await new Promise((r) => setTimeout(r, 5));
 
+    // Même entrée relancée deux fois de suite : garanti de produire un
+    // document identique (`.claude/rules/fiabilite.md` — « même entrée →
+    // même result.json hors horodatage »).
     const second = fakeArthurDocument();
     const secondOutcome = writeRunHistory(subjectDir, second);
 
     expect(secondOutcome.runFilename).not.toBe(firstOutcome.runFilename);
+    expect(secondOutcome.delta.status).toBe("unchanged");
+    const unchanged = secondOutcome.delta as Extract<DeltaOutcome, { status: "unchanged" }>;
+    expect(unchanged.run_precedent).toBe(firstOutcome.runFilename);
+  });
+
+  test("delta réel (« ok ») seulement quand quelque chose a effectivement changé, jamais pour deux entrées identiques", () => {
+    const subjectDir = makeScratchDir("recognaize-runs-changed-");
+    const first = fakeArthurDocument();
+    const firstOutcome = writeRunHistory(subjectDir, first);
+
+    // Document délibérément différent sur un seul champ (rang_affiche) et un
+    // seul axe (T.confiance) — jamais deux vrais runs indépendants, pour
+    // isoler exactement ce que `hasAnyChange`/`computeDelta` doivent
+    // détecter, sans dépendre d'une fixture qui changerait un jour.
+    const second = {
+      ...first,
+      rang_affiche: (first.rang_affiche === "copper" ? "silver" : "copper") as Rang,
+      axes: first.axes.map((axis) => (axis.axe === "T" ? { ...axis, confiance: Math.min(1, axis.confiance + 0.1) } : axis)),
+    };
+    const secondOutcome = writeRunHistory(subjectDir, second);
+
     expect(secondOutcome.delta.status).toBe("ok");
     const delta = secondOutcome.delta as Extract<DeltaOutcome, { status: "ok" }>;
     expect(delta.delta.run_precedent).toBe(firstOutcome.runFilename);
-    expect(delta.delta.rang_affiche.changed).toBe(false);
+    expect(delta.delta.rang_affiche.changed).toBe(true);
     expect(delta.delta.rang_affiche.avant).toBe(first.rang_affiche);
     expect(delta.delta.rang_affiche.apres).toBe(second.rang_affiche);
+    const axisT = delta.delta.axes.find((a) => a.axe === "T");
+    expect(axisT?.confiance.changed).toBe(true);
+    // Un axe non touché reste `changed: false` — le delta ne doit jamais
+    // signaler un changement là où rien n'a bougé.
+    const axisH = delta.delta.axes.find((a) => a.axe === "H");
+    expect(axisH?.confiance.changed).toBe(false);
   });
 
   test("un runs/*.json tronqué est ignoré pour le delta, sans crash (AC)", () => {

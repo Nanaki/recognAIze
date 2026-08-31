@@ -101,7 +101,18 @@ export interface ResultDelta {
   readonly axes: readonly AxisDelta[];
 }
 
-export type DeltaOutcome = { readonly status: "unknown"; readonly reason: string } | { readonly status: "ok"; readonly delta: ResultDelta };
+export type DeltaOutcome =
+  | { readonly status: "unknown"; readonly reason: string }
+  | { readonly status: "unchanged"; readonly run_precedent: string }
+  | { readonly status: "ok"; readonly delta: ResultDelta };
+
+/** Vrai si au moins un champ comparé (rang(s), fourchette, confiance globale, ou un axe) a changé. */
+function hasAnyChange(delta: ResultDelta): boolean {
+  if (delta.rang_affiche.changed || delta.rang_ponctuel.changed || delta.fourchette.changed || delta.confiance_globale.changed) {
+    return true;
+  }
+  return delta.axes.some((axis) => axis.niveau_ponctuel.changed || axis.confiance.changed);
+}
 
 /**
  * Compare deux `ResultDocument` du même sujet et du même `schema_version`
@@ -152,10 +163,21 @@ export function writeRunHistory(subjectOutputDir: string, document: ResultDocume
   const runPath = join(runsDir, runFilename);
   atomicWriteFileSync(runPath, `${JSON.stringify(document, null, 2)}\n`);
 
-  const deltaOutcome: DeltaOutcome =
-    previous === undefined
-      ? { status: "unknown", reason: "aucune exécution précédente comparable (même sujet, même schema_version)." }
-      : { status: "ok", delta: computeDelta(previous.document, document, previous.filename) };
+  const deltaOutcome: DeltaOutcome = (() => {
+    if (previous === undefined) {
+      return { status: "unknown", reason: "aucune exécution précédente comparable (même sujet, même schema_version)." };
+    }
+    const delta = computeDelta(previous.document, document, previous.filename);
+    if (!hasAnyChange(delta)) {
+      // Même sujet, même schema_version, RIEN n'a changé (cas typique : la même
+      // entrée relancée deux fois de suite, dont le résultat est garanti
+      // identique — .claude/rules/fiabilite.md). Un delta champ par champ
+      // rempli de `changed: false` partout n'apporterait aucune information ;
+      // `run_precedent` seul suffit à tracer QUEL run a été comparé.
+      return { status: "unchanged", run_precedent: previous.filename };
+    }
+    return { status: "ok", delta };
+  })();
 
   const deltaPath = join(runsDir, `${timestamp}.delta.json`);
   atomicWriteFileSync(deltaPath, `${JSON.stringify(deltaOutcome, null, 2)}\n`);
