@@ -125,6 +125,7 @@ function referenceSourcesPresentesFrom(signals: Readonly<Record<string, SignalVa
     RC: "RC.",
     S: "S.",
     SO: "SO.",
+    SU: "SU.",
     DEC: "DEC.",
   };
   for (const [source, prefix] of Object.entries(bySource) as [SourceId, string][]) {
