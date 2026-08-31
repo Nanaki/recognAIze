@@ -8,23 +8,26 @@
 >
 > Ce formulaire pointe le **tag `v1.0.0-rendu`**, jamais `main`, conformément
 > à `aidd_docs/memory/vcs.md` (« Main Branch : gelée par le tag `v1.0.0-rendu`
-> avant le rendu ; suite sur `next` »). Ce tag n'existe pas encore.
-> `aidd_docs/memory/vcs.md` fixe explicitement l'ordre : une seule MR est
-> ouverte vers `main` à la fin, après revue finale — la fusion vers `main`, la
-> pose du tag `v1.0.0-rendu` et la création de `next` restent gated derrière
-> cette revue et sont documentées comme actions restantes ci-dessous.
+> avant le rendu ; suite sur `next` »). Le tag existe désormais
+> (`d6d8a62`, posé le 2026-08-31 après la revue finale — voir
+> `aidd_docs/KNOWN-ISSUES.md` pour son résultat détaillé, 10 findings
+> confirmés, 1 corrigé, 9 documentés pour `next`). La MR #1
+> (`feat/mvp-chemin-jury` → `main`) a été fusionnée par merge commit, `next`
+> créée depuis `main`, `main` posée comme branche par défaut sur GitHub.
+> Reste une seule action humaine bloquante avant un rendu réellement
+> consultable : rendre le dépôt public (case de conformité ci-dessous).
 
 ## Lien du dépôt
 
 ```
-<TODO: à remplacer une fois le dépôt poussé — placeholder actuel : https://github.com/<OWNER>/recognAIze/tree/v1.0.0-rendu>
+https://github.com/Nanaki/recognAIze/tree/v1.0.0-rendu
 ```
 
-Un remote GitHub existe : `Nanaki/recognAIze`, mais **privé** — la branche
-`feat/mvp-chemin-jury` y est poussée, `main` n'y a jamais été touchée. Le lien
-définitif ci-dessus doit encore :
-- pointer le tag `v1.0.0-rendu` (URL de la forme `.../tree/v1.0.0-rendu`), jamais `main` ni une branche ;
-- n'être rempli qu'après que le dépôt a été rendu public sous licence MIT (action humaine restante, checklist ci-dessous).
+Le remote GitHub `Nanaki/recognAIze` reste **privé** pour l'instant — ce
+lien ne sera réellement accessible qu'une fois le dépôt rendu public sous
+licence MIT (action humaine restante, checklist ci-dessous). L'URL
+elle-même est déjà correcte : elle pointe le tag `v1.0.0-rendu`, jamais
+`main` ni une branche.
 
 ## Commandes de lancement
 
@@ -70,7 +73,7 @@ de la lettre pour l'enregistrer avant le rendu.
 ## Pseudo Discord
 
 ```
-<TODO: à remplir par l'auteur — aucun pseudo Discord connu de cette session, rien n'est inventé ici>
+sebastien_nicolas
 ```
 
 ## État de la CI (GitHub Actions)
@@ -78,38 +81,32 @@ de la lettre pour l'enregistrer avant le rendu.
 `.github/workflows/ci.yml` définit une matrice `[ubuntu-latest, macos-latest] ×
 [node 20, node 22]` (build, tests, eval) plus un job `secrets` (scan
 `gitleaks` sur chaque push et pull request). Les 4 jambes et le job `secrets`
-sont verts sur le remote (`Nanaki/recognAIze`, dépôt privé). `test/sources/read.test.ts`
-verrouille explicitement le comportement du tri sur un système de fichiers
-insensible à la casse (macOS/APFS), pour ne jamais dépendre d'une collision
-de noms de fichiers propre à une plateforme.
+sont verts sur `main` (run `33379410598`, le merge de la MR #1), dépôt encore
+privé. `test/sources/read.test.ts` verrouille explicitement le comportement
+du tri sur un système de fichiers insensible à la casse (macOS/APFS), pour
+ne jamais dépendre d'une collision de noms de fichiers propre à une
+plateforme.
 
 ## Cases de conformité
 
-- [ ] **Aucune clé dans le code ni l'historique.**
-  `gitleaks detect --source . --log-opts="--all" --redact --exit-code 1` sur
-  tout l'historique doit rendre 0 fuite juste avant le rendu — le nombre de
-  commits scannés augmente à chaque commit, se fier à `git rev-list --count HEAD`
-  pour le compte réel au moment du rendu. Le binaire n'est pas installé de
-  façon permanente sur la machine de développement : `.githooks/pre-commit`
-  avertit honnêtement quand le scan local est sauté ; `.github/workflows/ci.yml`
-  porte le job `secrets` qui l'exécute réellement sur CI, à chaque push.
-  **Ne pas cocher cette case avant un dernier `gitleaks detect
-  --log-opts=--all` sur l'état FINAL de l'historique**, une fois qu'il est
-  figé (des commits sont encore attendus).
+- [x] **Aucune clé dans le code ni l'historique.**
+  `gitleaks detect --source . --log-opts="--all" --redact --exit-code 1`
+  réexécuté le 2026-08-31 sur l'état FINAL de l'historique (170 commits
+  scannés, `git rev-list --count HEAD` fait foi) : **0 fuite**, exit `0`.
 - [ ] **Dépôt public sous licence MIT.**
   `LICENSE` (MIT, Sébastien Nicolas, 2026) est présente et vérifiée dans le
-  dépôt. Le dépôt GitHub existe (`Nanaki/recognAIze`) mais reste **privé**
-  par choix explicite, en attendant la revue finale. **Ne pas cocher avant
-  qu'il soit effectivement rendu public**, ce qui n'a lieu qu'après la revue
-  finale, par construction de `aidd_docs/memory/vcs.md` (une seule MR vers
-  `main`, après revue).
+  dépôt. La MR #1 est fusionnée, le tag `v1.0.0-rendu` posé, `main` est la
+  branche par défaut sur GitHub — mais le dépôt reste **privé**. **Ne pas
+  cocher avant qu'il soit effectivement rendu public**, action humaine
+  restante ci-dessous (irréversible en pratique : une fois exposé, même
+  re-privatisé, le contenu a pu être vu/cloné).
 
 ## Checklist restante pour un humain avant le rendu (lundi 31 août 2026, 12h)
 
 1. Enregistrer la vidéo en suivant `docs/demo/script-video.md` (3 scènes, ≤ 120 s, sans son) et coller le lien ci-dessus.
-2. Remplir le pseudo Discord ci-dessus.
-3. Ré-exécuter `gitleaks detect --log-opts=--all` sur l'état FINAL de l'historique juste avant le rendu et vérifier que le job `secrets` de `.github/workflows/ci.yml` est bien vert sur le remote.
-4. Faire tourner la revue finale, puis, une fois validée : ouvrir la MR vers `main`, la fusionner, poser le tag `v1.0.0-rendu`, geler `main`, créer `next` (`aidd_docs/memory/vcs.md`) — dans cet ordre.
-5. Rendre le dépôt `Nanaki/recognAIze` (déjà poussé, privé) public sous licence MIT (après la fusion ci-dessus).
-6. Remplacer le lien du dépôt ci-dessus par l'URL réelle pointant `v1.0.0-rendu`.
-7. Cocher les deux cases de conformité ci-dessus, seulement une fois 3 et 5 vérifiés pour de vrai.
+2. ~~Remplir le pseudo Discord ci-dessus.~~ Fait.
+3. ~~Ré-exécuter `gitleaks detect --log-opts=--all` sur l'état FINAL de l'historique juste avant le rendu et vérifier que le job `secrets` est bien vert sur le remote.~~ Fait (0 fuite, CI verte).
+4. ~~Faire tourner la revue finale, puis : ouvrir la MR vers `main`, la fusionner, poser le tag `v1.0.0-rendu`, geler `main`, créer `next`.~~ Fait — MR #1 fusionnée par merge commit, tag posé, `next` créée depuis `main`, `main` posée comme branche par défaut. Revue finale : `aidd_docs/KNOWN-ISSUES.md`.
+5. Rendre le dépôt `Nanaki/recognAIze` public sous licence MIT — **seule action bloquante restante** avant que ce formulaire soit consultable par le jury.
+6. ~~Remplacer le lien du dépôt ci-dessus par l'URL réelle pointant `v1.0.0-rendu`.~~ Fait (l'URL est correcte, seule sa portée dépend de l'étape 5).
+7. Cocher la case de conformité « dépôt public » ci-dessus, seulement une fois l'étape 5 faite pour de vrai.
