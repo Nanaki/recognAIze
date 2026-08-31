@@ -1,0 +1,11 @@
+{
+  "component": {
+    "key": "hostile:fixture",
+    "language": "ts",
+    "measures": [
+      { "metric": "coverage", "value": "pas un nombre" },
+      { "metric": "bugs", "value": "3.5" },
+      { "metric": "duplicated_lines_density", "value": "250" }
+    ]
+  }
+}

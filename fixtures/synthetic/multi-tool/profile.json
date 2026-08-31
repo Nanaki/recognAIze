@@ -1,0 +1,12 @@
+{
+  "profile_id": "multi-tool-synthetic",
+  "role": "développeur test",
+  "experience_years": 2,
+  "stack": [
+    "TypeScript"
+  ],
+  "team_size": 1,
+  "available": [
+    "repo-context/"
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "profile_id": "no-ai-trace-synthetic",
+  "role": "développeur test",
+  "experience_years": 3,
+  "stack": [
+    "TypeScript"
+  ],
+  "team_size": 2,
+  "available": [
+    "git-activity.json"
+  ]
+}

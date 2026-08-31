@@ -1,0 +1,17 @@
+﻿{
+  "profile_id": "hostile-fixture-🤖",
+  "role": "profil de test hostile",
+  "experience_years": 1,
+  "stack": [
+    "TypeScript"
+  ],
+  "available": [
+    "code/",
+    "declaratif.md",
+    "git-activity.json",
+    "sonar-measures.json",
+    "session.md",
+    "repo-context/",
+    "pull-requests.json"
+  ]
+}
