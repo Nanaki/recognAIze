@@ -1,0 +1,7 @@
+[
+  { "prompt": "Lance le test sur arthur avec l'outil agentique", "expect_action": "prepare-analysis" },
+  { "prompt": "Compare les deux outils sur bohort", "expect_action": "prepare-analysis" },
+  { "prompt": "Analyse ce profil avec l'agentique", "expect_action": "prepare-analysis" },
+  { "prompt": "Corrige le bug dans threshold-eval.ts", "expect_action": null },
+  { "prompt": "Lance recognaize sur ce dossier", "expect_action": null }
+]
